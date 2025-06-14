@@ -1,4 +1,4 @@
-# 🎭 Good Vibes Club (GVC) NFT Browser
+# 🤙 Good Vibes Club (GVC) NFT Browser
 
 A modern, feature-rich NFT browser application for exploring the Good Vibes Club collection. Built with React, TypeScript, and Material-UI, featuring advanced filtering, sorting, badge display, and real-time market data integration.
 
@@ -169,20 +169,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - OpenSea API
 - IPFS network providers
 - Material-UI team
-
-## 🐛 Known Issues & Limitations
-
-- OpenSea API rate limits may affect real-time data updates
-- Large collections (10k+ NFTs) may experience slower initial load times
-- Some IPFS gateways may occasionally be slow to respond
-
-## 🔮 Roadmap
-
-- [ ] Add wallet connection
-- [ ] Implement user favorites
-- [ ] Add collection analytics
-- [ ] Mobile app version
-- [ ] Multi-collection support
 
 ---
 
