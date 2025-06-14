@@ -11,6 +11,7 @@ interface FilterOptions {
   hair_color: Record<string, number>;
   face_color: Record<string, number>;
   badges: Record<string, number>;
+  badgeCount: Record<string, number>;
   body: {
     main: Record<string, number>;
     byType: Record<string, Record<string, number>>;
@@ -108,6 +109,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
     hair_color: {},
     face_color: {},
     badges: {},
+    badgeCount: {},
     body: { main: {}, byType: {} },
     background: { main: {}, byType: {} },
     face: { main: {}, byType: {} },
@@ -445,6 +447,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
           counts[key] = {};
         });
         counts.badges = {};
+        counts.badgeCount = {};
 
         // Count occurrences from rows
         rows.forEach(row => {
@@ -461,12 +464,18 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (columns[23]) counts.color_count[columns[23]] = (counts.color_count[columns[23]] || 0) + 1;
 
             // Badge counts (badge1 through badge5 are at columns 24-28)
+            let nftBadgeCount = 0;
             for (let i = 1; i <= 5; i++) {
               const badge = columns[23 + i]; // badge1 is at column 24 (index 23+1)
               if (badge && badge.trim()) {
                 counts.badges[badge.trim()] = (counts.badges[badge.trim()] || 0) + 1;
+                nftBadgeCount++;
               }
             }
+            
+            // Count NFTs by badge count (0-5)
+            const badgeCountKey = nftBadgeCount.toString();
+            counts.badgeCount[badgeCountKey] = (counts.badgeCount[badgeCountKey] || 0) + 1;
 
             // Hierarchical counts
             if (columns[2]) {
@@ -518,6 +527,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
           hair_color: counts.hair_color,
           face_color: counts.face_color,
           badges: counts.badges,
+          badgeCount: counts.badgeCount,
           body: hierarchicalCounts.body,
           background: hierarchicalCounts.background,
           face: hierarchicalCounts.face,

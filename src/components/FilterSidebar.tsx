@@ -135,18 +135,9 @@ const FilterSidebar: React.FC = () => {
   };
 
   const renderBadgeCountFilter = () => {
-    const badgeCountOptions = {
-      '0': 0,
-      '1': 0, 
-      '2': 0, 
-      '3': 0, 
-      '4': 0, 
-      '5': 0
-    };
-
     return renderSimpleFilter(
       'Badge Count', 
-      badgeCountOptions, 
+      filterOptions.badgeCount, 
       filters.badgeCount[0] || '', 
       (value) => setFilter('badgeCount', value ? [value] : []),
       (value) => {
