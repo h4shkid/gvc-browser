@@ -1,0 +1,39 @@
+{
+  "name": "gvc-nft-browser",
+  "version": "1.0.0",
+  "description": "A modern NFT browser for the Good Vibes Club collection with advanced filtering, badge display, and real-time market data",
+  "homepage": "https://github.com/your-username/gvc-nft-browser",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/gvc-nft-browser.git"
+  },
+  "keywords": ["nft", "react", "typescript", "good-vibes-club", "opensea", "web3", "collection-browser"],
+  "author": "Dappunk & H4shkid",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.1",
+    "@mui/material": "^7.1.1",
+    "ogl": "^1.0.11",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-loading-indicators": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.6",
+    "@vitejs/plugin-react": "^4.2.0",
+    "typescript": "^5.3.2",
+    "vite": "^5.0.3",
+    "vitest": "^1.0.0"
+  }
+}

@@ -1,0 +1,65 @@
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    height: 60px;
+    background-color: var(--background-color-light);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .dark .navbar {
+    background-color: var(--background-color-dark);
+    border-bottom-color: var(--border-color-dark);
+  }
+  
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .navbar-left h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  .navbar-center {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    padding: 0 2rem;
+  }
+  
+  .search-input {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color-light-accent);
+    color: var(--text-color-primary);
+  }
+  
+  .dark .search-input {
+    border-color: var(--border-color-dark);
+    background-color: var(--background-color-dark-accent);
+  }
+  
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .theme-toggle {
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+  
+  .dark .theme-toggle .sun { display: none; }
+  .theme-toggle .moon { display: none; }
+  .dark .theme-toggle .moon { display: inline; } 

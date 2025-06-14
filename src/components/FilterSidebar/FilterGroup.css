@@ -1,0 +1,33 @@
+.filter-group {
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .dark .filter-group {
+    border-bottom-color: var(--border-color-dark);
+  }
+  
+  .filter-group-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color-primary);
+  }
+  
+  .filter-group-header .chevron {
+    transition: transform 0.2s ease;
+  }
+  
+  .filter-group-header .chevron.open {
+    transform: rotate(180deg);
+  }
+  
+  .filter-group-content {
+    padding-bottom: 1rem;
+  } 
