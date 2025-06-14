@@ -229,6 +229,93 @@ const FilterSidebar: React.FC = () => {
     );
   };
 
+  const renderBadgeCountFilter = () => {
+    const badgeCountOptions = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+    
+    const toggleBadgeCount = (count: string) => {
+      const currentCounts = filters.badgeCount || [];
+      const newCounts = currentCounts.includes(count)
+        ? currentCounts.filter(c => c !== count)
+        : [...currentCounts, count];
+      setFilter('badgeCount', newCounts);
+    };
+
+    return (
+      <Box sx={{ mb: 2 }}>
+        <Typography 
+          variant="subtitle2" 
+          sx={{ 
+            mb: 2, 
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            textTransform: 'uppercase',
+            fontSize: '0.75rem',
+            letterSpacing: '0.1em'
+          }}
+        >
+          Badge Count
+        </Typography>
+        
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {Object.keys(badgeCountOptions).map((count) => {
+            const isSelected = filters.badgeCount?.includes(count) || false;
+            const label = count === '0' ? 'No badges' : `${count} badge${count === '1' ? '' : 's'}`;
+            
+            return (
+              <FormControlLabel
+                key={count}
+                control={
+                  <Checkbox
+                    checked={isSelected}
+                    onChange={() => toggleBadgeCount(count)}
+                    sx={{
+                      color: 'var(--text-secondary)',
+                      '&.Mui-checked': {
+                        color: '#66b3ff',
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                    {label}
+                  </Typography>
+                }
+                sx={{ 
+                  '& .MuiFormControlLabel-label': {
+                    color: 'var(--text-primary)',
+                    width: '100%'
+                  }
+                }}
+              />
+            );
+          })}
+        </Box>
+        
+        {/* Show selected badge counts as chips */}
+        {filters.badgeCount && filters.badgeCount.length > 0 && (
+          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {filters.badgeCount.map(count => (
+              <Chip
+                key={count}
+                label={count === '0' ? 'No badges' : `${count} badge${count === '1' ? '' : 's'}`}
+                size="small"
+                onDelete={() => toggleBadgeCount(count)}
+                sx={{
+                  backgroundColor: 'rgba(102, 179, 255, 0.2)',
+                  color: 'var(--text-primary)',
+                  '& .MuiChip-deleteIcon': {
+                    color: 'var(--text-primary)'
+                  }
+                }}
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
   return (
     <Box
       sx={{
@@ -394,6 +481,10 @@ const FilterSidebar: React.FC = () => {
         <Divider sx={{ my: 3, borderColor: 'var(--border-color)' }} />
         
         {renderBadgeFilter()}
+        
+        <Divider sx={{ my: 3, borderColor: 'var(--border-color)' }} />
+        
+        {renderBadgeCountFilter()}
       </Box>
     </Box>
   );

@@ -39,6 +39,7 @@ interface Filters {
   hair_color: string[];
   face_color: string[];
   badges: string[];
+  badgeCount: string[];
   body: string[];
   background: string[];
   face: string[];
@@ -79,6 +80,7 @@ const defaultFilters: Filters = {
   hair_color: [],
   face_color: [],
   badges: [],
+  badgeCount: [],
   body: [],
   background: [],
   face: [],
@@ -174,6 +176,20 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
           nftBadges.includes(selectedBadge)
         );
         if (!hasBadge) return false;
+      }
+
+      // Badge count filters
+      if (filters.badgeCount.length > 0) {
+        const nftBadges = [];
+        for (let i = 1; i <= 5; i++) {
+          const badge = nft[`badge${i}`];
+          if (badge && badge.trim()) {
+            nftBadges.push(badge.trim());
+          }
+        }
+        
+        const badgeCount = nftBadges.length.toString();
+        if (!filters.badgeCount.includes(badgeCount)) return false;
       }
 
       return true;
