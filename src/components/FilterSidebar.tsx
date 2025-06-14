@@ -29,7 +29,8 @@ const FilterSidebar: React.FC = () => {
     label: string,
     options: Record<string, number>,
     value: string,
-    onChange: (value: string) => void
+    onChange: (value: string) => void,
+    formatLabel?: (value: string) => string
   ) => {
     return (
       <Box sx={{ mb: 2 }}>
@@ -68,7 +69,7 @@ const FilterSidebar: React.FC = () => {
             {Object.entries(options).map(([option, count]) => (
               <MenuItem key={option} value={option}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                  <span>{option}</span>
+                  <span>{formatLabel ? formatLabel(option) : option}</span>
                   <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>({count})</span>
                 </Box>
               </MenuItem>
@@ -133,186 +134,39 @@ const FilterSidebar: React.FC = () => {
     );
   };
 
+  const renderBadgeCountFilter = () => {
+    const badgeCountOptions = {
+      '0': 0,
+      '1': 0, 
+      '2': 0, 
+      '3': 0, 
+      '4': 0, 
+      '5': 0
+    };
+
+    return renderSimpleFilter(
+      'Badge Count', 
+      badgeCountOptions, 
+      filters.badgeCount[0] || '', 
+      (value) => setFilter('badgeCount', value ? [value] : []),
+      (value) => {
+        if (value === '0') return 'No badges';
+        return `${value} badge${value === '1' ? '' : 's'}`;
+      }
+    );
+  };
+
   const renderBadgeFilter = () => {
     if (!filterOptions.badges || Object.keys(filterOptions.badges).length === 0) {
       return null;
     }
 
-    const toggleBadge = (badgeKey: string) => {
-      const currentBadges = filters.badges || [];
-      const newBadges = currentBadges.includes(badgeKey)
-        ? currentBadges.filter(b => b !== badgeKey)
-        : [...currentBadges, badgeKey];
-      setFilter('badges', newBadges);
-    };
-
-    return (
-      <Box sx={{ mb: 2 }}>
-        <Typography 
-          variant="subtitle2" 
-          sx={{ 
-            mb: 2, 
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            fontSize: '0.75rem',
-            letterSpacing: '0.1em'
-          }}
-        >
-          Badges
-        </Typography>
-        
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {Object.entries(filterOptions.badges)
-            .sort(([,a], [,b]) => b - a) // Sort by count descending
-            .map(([badgeKey, count]) => {
-              const displayName = getBadgeDisplayName(badgeKey, badgeData);
-              const isSelected = filters.badges?.includes(badgeKey) || false;
-              
-              return (
-                <FormControlLabel
-                  key={badgeKey}
-                  control={
-                    <Checkbox
-                      checked={isSelected}
-                      onChange={() => toggleBadge(badgeKey)}
-                      sx={{
-                        color: 'var(--text-secondary)',
-                        '&.Mui-checked': {
-                          color: '#66b3ff',
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                      <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-                        {displayName}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'var(--text-secondary)', ml: 1 }}>
-                        ({count})
-                      </Typography>
-                    </Box>
-                  }
-                  sx={{ 
-                    '& .MuiFormControlLabel-label': {
-                      color: 'var(--text-primary)',
-                      width: '100%'
-                    }
-                  }}
-                />
-              );
-            })}
-        </Box>
-        
-        {/* Show selected badges as chips */}
-        {filters.badges && filters.badges.length > 0 && (
-          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {filters.badges.map(badgeKey => (
-              <Chip
-                key={badgeKey}
-                label={getBadgeDisplayName(badgeKey, badgeData)}
-                size="small"
-                onDelete={() => toggleBadge(badgeKey)}
-                sx={{
-                  backgroundColor: 'rgba(102, 179, 255, 0.2)',
-                  color: 'var(--text-primary)',
-                  '& .MuiChip-deleteIcon': {
-                    color: 'var(--text-primary)'
-                  }
-                }}
-              />
-            ))}
-          </Box>
-        )}
-      </Box>
-    );
-  };
-
-  const renderBadgeCountFilter = () => {
-    const badgeCountOptions = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
-    
-    const toggleBadgeCount = (count: string) => {
-      const currentCounts = filters.badgeCount || [];
-      const newCounts = currentCounts.includes(count)
-        ? currentCounts.filter(c => c !== count)
-        : [...currentCounts, count];
-      setFilter('badgeCount', newCounts);
-    };
-
-    return (
-      <Box sx={{ mb: 2 }}>
-        <Typography 
-          variant="subtitle2" 
-          sx={{ 
-            mb: 2, 
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-            textTransform: 'uppercase',
-            fontSize: '0.75rem',
-            letterSpacing: '0.1em'
-          }}
-        >
-          Badge Count
-        </Typography>
-        
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {Object.keys(badgeCountOptions).map((count) => {
-            const isSelected = filters.badgeCount?.includes(count) || false;
-            const label = count === '0' ? 'No badges' : `${count} badge${count === '1' ? '' : 's'}`;
-            
-            return (
-              <FormControlLabel
-                key={count}
-                control={
-                  <Checkbox
-                    checked={isSelected}
-                    onChange={() => toggleBadgeCount(count)}
-                    sx={{
-                      color: 'var(--text-secondary)',
-                      '&.Mui-checked': {
-                        color: '#66b3ff',
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-                    {label}
-                  </Typography>
-                }
-                sx={{ 
-                  '& .MuiFormControlLabel-label': {
-                    color: 'var(--text-primary)',
-                    width: '100%'
-                  }
-                }}
-              />
-            );
-          })}
-        </Box>
-        
-        {/* Show selected badge counts as chips */}
-        {filters.badgeCount && filters.badgeCount.length > 0 && (
-          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {filters.badgeCount.map(count => (
-              <Chip
-                key={count}
-                label={count === '0' ? 'No badges' : `${count} badge${count === '1' ? '' : 's'}`}
-                size="small"
-                onDelete={() => toggleBadgeCount(count)}
-                sx={{
-                  backgroundColor: 'rgba(102, 179, 255, 0.2)',
-                  color: 'var(--text-primary)',
-                  '& .MuiChip-deleteIcon': {
-                    color: 'var(--text-primary)'
-                  }
-                }}
-              />
-            ))}
-          </Box>
-        )}
-      </Box>
+    return renderSimpleFilter(
+      'Badges',
+      filterOptions.badges,
+      filters.badges[0] || '',
+      (value) => setFilter('badges', value ? [value] : []),
+      (value) => getBadgeDisplayName(value, badgeData)
     );
   };
 
@@ -480,11 +334,22 @@ const FilterSidebar: React.FC = () => {
         
         <Divider sx={{ my: 3, borderColor: 'var(--border-color)' }} />
         
-        {renderBadgeFilter()}
-        
-        <Divider sx={{ my: 3, borderColor: 'var(--border-color)' }} />
-        
+        <Typography 
+          variant="subtitle2" 
+          sx={{ 
+            mb: 2, 
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            textTransform: 'uppercase',
+            fontSize: '0.75rem',
+            letterSpacing: '0.1em'
+          }}
+        >
+          Badges
+        </Typography>
+
         {renderBadgeCountFilter()}
+        {renderBadgeFilter()}
       </Box>
     </Box>
   );
