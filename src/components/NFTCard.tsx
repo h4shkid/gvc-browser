@@ -157,7 +157,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
           <BadgesList 
             badges={nftBadges} 
             size="large" 
-            maxVisible={4}
+            maxVisible={5}
           />
         </Box>
       )}
