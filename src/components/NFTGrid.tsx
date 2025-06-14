@@ -291,6 +291,31 @@ const NFTGrid: React.FC = () => {
           </Button>
         </div>
       )}
+      {loading && (
+        <Box sx={{ 
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          textAlign: 'center'
+        }}>
+          <Typography 
+            variant="h3" 
+            sx={{ 
+              mb: 3,
+              background: 'linear-gradient(45deg, #66b3ff, #4dabf7)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 700,
+              fontSize: { xs: '2rem', md: '3rem' }
+            }}
+          >
+            Impending Vibes
+          </Typography>
+          <Mosaic color="#66b3ff" size="large" text="" textColor="" />
+        </Box>
+      )}
       {nftsWithCurrentListings.length === 0 && !loading && (
         <Box sx={{ 
           textAlign: 'center', 
