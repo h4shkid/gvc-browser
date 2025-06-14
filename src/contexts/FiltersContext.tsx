@@ -267,6 +267,17 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const lowerQuery = query.toLowerCase();
     const suggestions: SearchSuggestion[] = [];
     
+    // Easter egg for serc1n 🎉
+    if (lowerQuery.includes('kinky')) {
+      suggestions.push({
+        type: 'trait',
+        category: 'Body',
+        value: 'Tank Top Black',
+        count: 1,
+        label: 'Body: Tank Top Black (Special for serc1n 🎉)'
+      });
+    }
+    
     // Token ID suggestions
     const matchingTokenIds = tokenIds.filter(id => 
       id.toLowerCase().includes(lowerQuery)
