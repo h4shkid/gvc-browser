@@ -511,7 +511,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const loadFilterOptions = async () => {
       try {
-        const response = await fetch('/data/gvc_data.csv');
+        const response = await fetch(`${import.meta.env.BASE_URL}data/gvc_data.csv`);
         const csvText = await response.text();
         let rows = csvText.split('\n').slice(1);
         rows = rows.filter(row => row.trim() !== '');

@@ -18,7 +18,7 @@ export async function loadBadgeData(): Promise<BadgeData> {
   }
 
   try {
-    const response = await fetch('/data/badges.csv');
+    const response = await fetch(`${import.meta.env.BASE_URL}data/badges.csv`);
     const text = await response.text();
     const lines = text.split('\n').filter(line => line.trim());
     
@@ -33,7 +33,7 @@ export async function loadBadgeData(): Promise<BadgeData> {
         badgeData[key.trim()] = {
           key: key.trim(),
           displayName: displayName.trim(),
-          imagePath: `/badges/${key.trim()}.png`
+          imagePath: `${import.meta.env.BASE_URL}badges/${key.trim()}.png`
         };
       }
     });

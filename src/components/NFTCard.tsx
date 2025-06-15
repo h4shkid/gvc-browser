@@ -526,7 +526,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
                 onClick={e => e.stopPropagation()}
                 size="small"
               >
-                <img src="/images/opensea-logo.svg" alt="OpenSea" style={{ width: 20, height: 20, display: 'block' }} />
+                <img src={`${import.meta.env.BASE_URL}images/opensea-logo.svg`} alt="OpenSea" style={{ width: 20, height: 20, display: 'block' }} />
               </IconButton>
             )}
           </Box>
