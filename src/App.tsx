@@ -207,6 +207,19 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
         {/* Left section - Brand and Show Filters */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              component="img"
+              src="/badges/any_gvc.png"
+              alt="GVC Logo"
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                border: '2px solid rgba(102, 179, 255, 0.3)',
+                background: 'rgba(255, 255, 255, 0.1)',
+                padding: '2px'
+              }}
+            />
             <Typography 
               variant="h5" 
               component="h1" 
@@ -218,7 +231,7 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                 WebkitTextFillColor: 'transparent'
               }}
             >
-              Vibie Browser
+              Vibes Browser
             </Typography>
             <Chip
               label="BETA"
