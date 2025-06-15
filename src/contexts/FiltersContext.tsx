@@ -12,19 +12,33 @@ interface FilterOptions {
   face_color: Record<string, number>;
   badges: Record<string, number>;
   badgeCount: Record<string, number>;
-  body: {
+  // Additional individual trait fields for comprehensive search
+  background: Record<string, number>;
+  background_type: Record<string, number>;
+  body: Record<string, number>;
+  body_type: Record<string, number>;
+  body_style: Record<string, number>;
+  face: Record<string, number>;
+  face_type: Record<string, number>;
+  face_style: Record<string, number>;
+  hair: Record<string, number>;
+  hair_type: Record<string, number>;
+  hair_style: Record<string, number>;
+  type: Record<string, number>;
+  // Hierarchical versions for filter sidebar
+  bodyHierarchical: {
     main: Record<string, number>;
     byType: Record<string, Record<string, number>>;
   };
-  background: {
+  backgroundHierarchical: {
     main: Record<string, number>;
     byType: Record<string, Record<string, number>>;
   };
-  face: {
+  faceHierarchical: {
     main: Record<string, number>;
     byType: Record<string, Record<string, number>>;
   };
-  hair: {
+  hairHierarchical: {
     main: Record<string, number>;
     byType: Record<string, Record<string, number>>;
   };
@@ -117,10 +131,24 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
     face_color: {},
     badges: {},
     badgeCount: {},
-    body: { main: {}, byType: {} },
-    background: { main: {}, byType: {} },
-    face: { main: {}, byType: {} },
-    hair: { main: {}, byType: {} },
+    // Individual trait fields for comprehensive search
+    background: {},
+    background_type: {},
+    body: {},
+    body_type: {},
+    body_style: {},
+    face: {},
+    face_type: {},
+    face_style: {},
+    hair: {},
+    hair_type: {},
+    hair_style: {},
+    type: {},
+    // Hierarchical versions for filter sidebar
+    bodyHierarchical: { main: {}, byType: {} },
+    backgroundHierarchical: { main: {}, byType: {} },
+    faceHierarchical: { main: {}, byType: {} },
+    hairHierarchical: { main: {}, byType: {} },
   });
 
   // Load badge data
@@ -134,16 +162,16 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Face color only shows when "Glasses" is selected in face filter
       return filters.face.some(faceStyle => {
         // Check if any selected face style belongs to "Glasses" type
-        return filterOptions.face.byType['Glasses'] && 
-               Object.keys(filterOptions.face.byType['Glasses']).includes(faceStyle);
+        return filterOptions.faceHierarchical.byType['Glasses'] && 
+               Object.keys(filterOptions.faceHierarchical.byType['Glasses']).includes(faceStyle);
       });
     },
     shouldShowHairColor: (selectedHair: string) => {
       // Hair color only shows when "Hair" type is selected in hair filter
       return filters.hair.some(hairStyle => {
         // Check if any selected hair style belongs to "Hair" type
-        return filterOptions.hair.byType['Hair'] && 
-               Object.keys(filterOptions.hair.byType['Hair']).includes(hairStyle);
+        return filterOptions.hairHierarchical.byType['Hair'] && 
+               Object.keys(filterOptions.hairHierarchical.byType['Hair']).includes(hairStyle);
       });
     },
     getFilteredColorCount: () => {
@@ -358,20 +386,32 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
       });
     });
 
-    // Simple trait suggestions - all available traits from CSV
-    const simpleTraits = [
+    // ALL trait suggestions - every field from CSV data
+    const allTraitFields = [
       { key: 'gender', label: 'Gender' },
+      { key: 'background', label: 'Background' },
+      { key: 'background_type', label: 'Background Type' },
+      { key: 'body', label: 'Body Full' },
+      { key: 'body_type', label: 'Body Type' },
+      { key: 'body_style', label: 'Body Style' },
+      { key: 'body_color', label: 'Body Color' },
+      { key: 'face', label: 'Face Full' },
+      { key: 'face_type', label: 'Face Type' },
+      { key: 'face_style', label: 'Face Style' },
+      { key: 'face_color', label: 'Face Color' },
+      { key: 'hair', label: 'Hair Full' },
+      { key: 'hair_type', label: 'Hair Type' },
+      { key: 'hair_style', label: 'Hair Style' },
+      { key: 'hair_color', label: 'Hair Color' },
+      { key: 'type', label: 'Type Full' },
+      { key: 'type_type', label: 'Type' },
+      { key: 'type_color', label: 'Type Color' },
       { key: 'color_group', label: 'Color Group' },
       { key: 'color_count', label: 'Color Count' },
-      { key: 'type_color', label: 'Type Color' },
-      { key: 'type_type', label: 'Type' },
-      { key: 'body_color', label: 'Body Color' },
-      { key: 'hair_color', label: 'Hair Color' },
-      { key: 'face_color', label: 'Face Color' },
       { key: 'badges', label: 'Badge' }
     ];
 
-    simpleTraits.forEach(({ key, label }) => {
+    allTraitFields.forEach(({ key, label }) => {
       const options = filterOptions[key as keyof FilterOptions] as Record<string, number>;
       if (options) {
         Object.entries(options).forEach(([value, count]) => {
@@ -403,12 +443,12 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     });
 
-    // Hierarchical trait suggestions - include both main types and sub-styles
+    // Hierarchical trait suggestions for filter sidebar compatibility
     const hierarchicalTraits = [
-      { key: 'body', label: 'Body' },
-      { key: 'background', label: 'Background' },
-      { key: 'face', label: 'Face' },
-      { key: 'hair', label: 'Hair' }
+      { key: 'bodyHierarchical', label: 'Body' },
+      { key: 'backgroundHierarchical', label: 'Background' },
+      { key: 'faceHierarchical', label: 'Face' },
+      { key: 'hairHierarchical', label: 'Hair' }
     ];
 
     hierarchicalTraits.forEach(({ key, label }) => {
@@ -547,13 +587,25 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
         rows.forEach(row => {
           const columns = row.split(',');
           if (columns.length > 1) {
-            // Simple counts
+            // All individual trait counts for comprehensive search
             if (columns[1]) counts.gender[columns[1]] = (counts.gender[columns[1]] || 0) + 1;
+            if (columns[2]) counts.background[columns[2]] = (counts.background[columns[2]] || 0) + 1;
+            if (columns[3]) counts.background_type[columns[3]] = (counts.background_type[columns[3]] || 0) + 1;
+            if (columns[4]) counts.body[columns[4]] = (counts.body[columns[4]] || 0) + 1;
+            if (columns[5]) counts.body_type[columns[5]] = (counts.body_type[columns[5]] || 0) + 1;
+            if (columns[6]) counts.body_style[columns[6]] = (counts.body_style[columns[6]] || 0) + 1;
             if (columns[7]) counts.body_color[columns[7]] = (counts.body_color[columns[7]] || 0) + 1;
+            if (columns[8]) counts.face[columns[8]] = (counts.face[columns[8]] || 0) + 1;
+            if (columns[9]) counts.face_type[columns[9]] = (counts.face_type[columns[9]] || 0) + 1;
+            if (columns[10]) counts.face_style[columns[10]] = (counts.face_style[columns[10]] || 0) + 1;
             if (columns[11]) counts.face_color[columns[11]] = (counts.face_color[columns[11]] || 0) + 1;
+            if (columns[12]) counts.hair[columns[12]] = (counts.hair[columns[12]] || 0) + 1;
+            if (columns[13]) counts.hair_type[columns[13]] = (counts.hair_type[columns[13]] || 0) + 1;
+            if (columns[14]) counts.hair_style[columns[14]] = (counts.hair_style[columns[14]] || 0) + 1;
             if (columns[15]) counts.hair_color[columns[15]] = (counts.hair_color[columns[15]] || 0) + 1;
-            if (columns[18]) counts.type_color[columns[18]] = (counts.type_color[columns[18]] || 0) + 1;
+            if (columns[16]) counts.type[columns[16]] = (counts.type[columns[16]] || 0) + 1;
             if (columns[17]) counts.type_type[columns[17]] = (counts.type_type[columns[17]] || 0) + 1;
+            if (columns[18]) counts.type_color[columns[18]] = (counts.type_color[columns[18]] || 0) + 1;
             if (columns[22]) counts.color_group[columns[22]] = (counts.color_group[columns[22]] || 0) + 1;
             if (columns[23]) counts.color_count[columns[23]] = (counts.color_count[columns[23]] || 0) + 1;
 
@@ -639,10 +691,24 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
           face_color: counts.face_color,
           badges: counts.badges,
           badgeCount: counts.badgeCount,
-          body: hierarchicalCounts.body,
-          background: hierarchicalCounts.background,
-          face: hierarchicalCounts.face,
-          hair: hierarchicalCounts.hair,
+          // Individual trait fields for comprehensive search
+          background: counts.background,
+          background_type: counts.background_type,
+          body: counts.body,
+          body_type: counts.body_type,
+          body_style: counts.body_style,
+          face: counts.face,
+          face_type: counts.face_type,
+          face_style: counts.face_style,
+          hair: counts.hair,
+          hair_type: counts.hair_type,
+          hair_style: counts.hair_style,
+          type: counts.type,
+          // Hierarchical versions for filter sidebar
+          bodyHierarchical: hierarchicalCounts.body,
+          backgroundHierarchical: hierarchicalCounts.background,
+          faceHierarchical: hierarchicalCounts.face,
+          hairHierarchical: hierarchicalCounts.hair,
         });
         setTotalNfts(rows.length);
         setTokenIds(rows.map(row => row.split(',')[0]).filter(Boolean));

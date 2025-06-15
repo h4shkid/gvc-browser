@@ -67,18 +67,35 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
           case 'Color Count': filterKey = 'color_count'; break;
           case 'Type': filterKey = 'type_type'; break;
           case 'Type Color': filterKey = 'type_color'; break;
-          case 'Body': filterKey = 'body'; break;
-          case 'Body Type': filterKey = 'body'; break;
           case 'Body Color': filterKey = 'body_color'; break;
-          case 'Face': filterKey = 'face'; break;
-          case 'Face Type': filterKey = 'face'; break;
           case 'Face Color': filterKey = 'face_color'; break;
-          case 'Hair': filterKey = 'hair'; break;
-          case 'Hair Type': filterKey = 'hair'; break;
           case 'Hair Color': filterKey = 'hair_color'; break;
-          case 'Background': filterKey = 'background'; break;
-          case 'Background Type': filterKey = 'background'; break;
           case 'Badge': filterKey = 'badges'; break;
+          // All individual trait fields - map to hierarchical filters for consistency
+          case 'Background':
+          case 'Background Type':
+          case 'Background Full':
+            filterKey = 'background';
+            break;
+          case 'Body':
+          case 'Body Type':
+          case 'Body Style':
+          case 'Body Full':
+            filterKey = 'body';
+            break;
+          case 'Face':
+          case 'Face Type':
+          case 'Face Style':
+          case 'Face Full':
+            filterKey = 'face';
+            break;
+          case 'Hair':
+          case 'Hair Type':
+          case 'Hair Style':
+          case 'Hair Full':
+            filterKey = 'hair';
+            break;
+          case 'Type Full':
           default:
             setFilter('search', '');
             setActiveSearchFilter(null);
@@ -105,25 +122,48 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
       // Apply the specific filter for this category
       let filterKey: keyof typeof filters;
       
-      // Map category names to filter keys
+      // Map category names to filter keys - comprehensive mapping for all traits
       switch (option.category) {
         case 'Gender': filterKey = 'gender'; break;
         case 'Color Group': filterKey = 'color_group'; break;
         case 'Color Count': filterKey = 'color_count'; break;
         case 'Type': filterKey = 'type_type'; break;
         case 'Type Color': filterKey = 'type_color'; break;
-        case 'Body': filterKey = 'body'; break;
-        case 'Body Type': filterKey = 'body'; break; // Map Body Type to body filter
         case 'Body Color': filterKey = 'body_color'; break;
-        case 'Face': filterKey = 'face'; break;
-        case 'Face Type': filterKey = 'face'; break; // Map Face Type to face filter
         case 'Face Color': filterKey = 'face_color'; break;
-        case 'Hair': filterKey = 'hair'; break;
-        case 'Hair Type': filterKey = 'hair'; break; // Map Hair Type to hair filter
         case 'Hair Color': filterKey = 'hair_color'; break;
-        case 'Background': filterKey = 'background'; break;
-        case 'Background Type': filterKey = 'background'; break; // Map Background Type to background filter
         case 'Badge': filterKey = 'badges'; break;
+        // All individual trait fields - map to hierarchical filters for consistency
+        case 'Background':
+        case 'Background Type':
+        case 'Background Full':
+          filterKey = 'background';
+          break;
+        case 'Body':
+        case 'Body Type':
+        case 'Body Style':
+        case 'Body Full':
+          filterKey = 'body';
+          break;
+        case 'Face':
+        case 'Face Type':
+        case 'Face Style':
+        case 'Face Full':
+          filterKey = 'face';
+          break;
+        case 'Hair':
+        case 'Hair Type':
+        case 'Hair Style':
+        case 'Hair Full':
+          filterKey = 'hair';
+          break;
+        case 'Type Full':
+          // For full type descriptions, fall back to search
+          setSearchValue(option.value);
+          setFilter('search', option.value);
+          setActiveSearchFilter(option);
+          setIsDropdownOpen(false);
+          return;
         default:
           // Fallback to search if category not recognized
           setSearchValue(option.value);
