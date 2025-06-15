@@ -7,7 +7,15 @@
     "type": "git",
     "url": "git+https://github.com/your-username/gvc-nft-browser.git"
   },
-  "keywords": ["nft", "react", "typescript", "good-vibes-club", "opensea", "web3", "collection-browser"],
+  "keywords": [
+    "nft",
+    "react",
+    "typescript",
+    "good-vibes-club",
+    "opensea",
+    "web3",
+    "collection-browser"
+  ],
   "author": "Dappunk & H4shkid",
   "license": "MIT",
   "private": false,
@@ -22,12 +30,14 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.1.1",
     "@mui/material": "^7.1.1",
+    "html2canvas": "^1.4.1",
     "ogl": "^1.0.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-loading-indicators": "^1.0.1"
   },
   "devDependencies": {
+    "@types/html2canvas": "^0.5.35",
     "@types/node": "^24.0.1",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",

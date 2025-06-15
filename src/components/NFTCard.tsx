@@ -7,8 +7,12 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import InfoIcon from '@mui/icons-material/Info';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Tooltip from '@mui/material/Tooltip';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import { Mosaic } from 'react-loading-indicators';
+import html2canvas from 'html2canvas';
 import { useEthPrice } from '../hooks/useEthPrice';
 import BadgesList from './BadgesList';
 import { loadBadgeData, getNFTBadges, BadgeData } from '../utils/badges';
@@ -73,6 +77,9 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
   const [badgeData, setBadgeData] = useState<BadgeData>({});
   const [isVisible, setIsVisible] = useState(false);
   const [loadedImageUrl, setLoadedImageUrl] = useState<string>('');
+  const [isHovered, setIsHovered] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const ethPrice = useEthPrice();
@@ -176,26 +183,105 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
     }
   }, [isVisible, loadedImageUrl, imgError, imageLoading, loadImageWithOptimizedGateways]);
 
+  // Copy card as image to clipboard
+  const copyCardToClipboard = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!cardRef.current || isCopying) return;
+    
+    setIsCopying(true);
+    
+    try {
+      // Wait a bit for any hover effects to settle
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Capture the card as canvas
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: '#2a2a2a', // Match card background
+        scale: 2, // Higher quality
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: true,
+        logging: false,
+        width: cardRef.current.offsetWidth,
+        height: cardRef.current.offsetHeight,
+      });
+      
+      // Convert canvas to blob
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          throw new Error('Failed to create image blob');
+        }
+        
+        try {
+          // Copy to clipboard using modern Clipboard API
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/png': blob
+            })
+          ]);
+          
+          setShowCopySuccess(true);
+          setTimeout(() => setShowCopySuccess(false), 2000);
+        } catch (clipboardError) {
+          console.error('Failed to copy to clipboard:', clipboardError);
+          // Fallback: download the image
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `nft-${nft.id}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
+      }, 'image/png', 0.95);
+      
+    } catch (error) {
+      console.error('Failed to capture card:', error);
+    } finally {
+      setIsCopying(false);
+    }
+  }, [nft.id, isCopying]);
+
+  // Handle mobile tap detection
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    // On mobile, first tap shows copy button, second tap triggers onClick
+    if (window.innerWidth <= 768) {
+      if (!isHovered) {
+        e.stopPropagation();
+        setIsHovered(true);
+        // Hide copy button after 3 seconds
+        setTimeout(() => setIsHovered(false), 3000);
+        return;
+      }
+    }
+    onClick?.();
+  }, [isHovered, onClick]);
+
   return (
-    <Card
-      ref={cardRef}
-      sx={{
-        background: 'var(--card-bg, #2a2a2a)',
-        color: 'var(--text-primary, #fff)',
-        borderRadius: 2,
-        boxShadow: 3,
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: nftBadges.length > 0 ? 420 : 380,
-        height: '100%',
-        overflow: 'hidden',
-        position: 'relative',
-        cursor: 'pointer',
-        transition: 'box-shadow 0.2s',
-        '&:hover': { boxShadow: 8 },
-      }}
-      onClick={onClick}
-    >
+    <>
+      <Card
+        ref={cardRef}
+        sx={{
+          background: 'var(--card-bg, #2a2a2a)',
+          color: 'var(--text-primary, #fff)',
+          borderRadius: 2,
+          boxShadow: 3,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: nftBadges.length > 0 ? 420 : 380,
+          height: '100%',
+          overflow: 'hidden',
+          position: 'relative',
+          cursor: 'pointer',
+          transition: 'box-shadow 0.2s',
+          '&:hover': { boxShadow: 8 },
+        }}
+        onClick={handleCardClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
       <Box sx={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', background: '#181a20', flex: '0 0 auto' }}>
         {/* Show loading animation when image is loading or not yet visible */}
         {(imageLoading || (!loadedImageUrl && !imgError)) && (
@@ -229,6 +315,63 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
         {imgError && !loadedImageUrl && (
           <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#181a20', color: '#fff' }}>
             Image not available
+          </Box>
+        )}
+        
+        {/* Copy button - appears on hover/tap */}
+        {isHovered && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 10,
+              opacity: isHovered ? 1 : 0,
+              transition: 'opacity 0.2s ease-in-out',
+            }}
+          >
+            <Tooltip title="Copy card as image" placement="left">
+              <IconButton
+                onClick={copyCardToClipboard}
+                disabled={isCopying}
+                sx={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                  color: '#fff',
+                  width: 36,
+                  height: 36,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    color: '#66b3ff',
+                  },
+                  '&:disabled': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    color: 'rgba(255, 255, 255, 0.5)',
+                  },
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+                size="small"
+              >
+                {isCopying ? (
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderTop: '2px solid #fff',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                      '@keyframes spin': {
+                        '0%': { transform: 'rotate(0deg)' },
+                        '100%': { transform: 'rotate(360deg)' },
+                      },
+                    }}
+                  />
+                ) : (
+                  <ContentCopyIcon fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
           </Box>
         )}
       </Box>
@@ -371,6 +514,24 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
         </Box>
       </CardContent>
     </Card>
+    
+    {/* Success notification */}
+    <Snackbar
+      open={showCopySuccess}
+      autoHideDuration={2000}
+      onClose={() => setShowCopySuccess(false)}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    >
+      <Alert 
+        onClose={() => setShowCopySuccess(false)} 
+        severity="success" 
+        variant="filled"
+        sx={{ backgroundColor: '#4CAF50' }}
+      >
+        Copied to clipboard!
+      </Alert>
+    </Snackbar>
+  </>
   );
 };
 
