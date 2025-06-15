@@ -111,6 +111,11 @@ const FilterSidebar: React.FC = () => {
       onChange(newValues);
     };
 
+    // Safety check to prevent crashes
+    if (!options || !options.main) {
+      return null;
+    }
+
     return (
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, color: 'var(--text-primary)' }}>
@@ -123,7 +128,7 @@ const FilterSidebar: React.FC = () => {
             .map(([mainCategory, count]) => {
               // Special handling for background - only show subcategories for "1 of 1" (matching old system)
               const shouldShowSubcategories = label === 'Background' ? mainCategory === '1 of 1' : true;
-              const hasSubcategories = shouldShowSubcategories && options.byType[mainCategory] && Object.keys(options.byType[mainCategory]).length > 0;
+              const hasSubcategories = shouldShowSubcategories && options.byType && options.byType[mainCategory] && Object.keys(options.byType[mainCategory]).length > 0;
               const isExpanded = expandedCategories.has(mainCategory);
               const isSelected = selectedValues.includes(mainCategory);
               
@@ -166,7 +171,7 @@ const FilterSidebar: React.FC = () => {
                   </Box>
                   
                   {/* Subcategories */}
-                  {hasSubcategories && isExpanded && (
+                  {hasSubcategories && isExpanded && options.byType && options.byType[mainCategory] && (
                     <Box sx={{ pl: 3, mt: 1 }}>
                       {Object.entries(options.byType[mainCategory])
                         .sort(([,a], [,b]) => b - a)
@@ -371,10 +376,10 @@ const FilterSidebar: React.FC = () => {
         {/* Physical Traits */}
         {renderFilterGroup('Physical Traits', (
           <>
-            {renderHierarchicalFilter('Background', filterOptions.background, filters.background, (values) => setFilter('background', values))}
-            {renderHierarchicalFilter('Body', filterOptions.body, filters.body, (values) => setFilter('body', values))}
-            {renderHierarchicalFilter('Face', filterOptions.face, filters.face, (values) => setFilter('face', values))}
-            {renderHierarchicalFilter('Hair', filterOptions.hair, filters.hair, (values) => setFilter('hair', values))}
+            {renderHierarchicalFilter('Background', filterOptions.backgroundHierarchical, filters.background, (values) => setFilter('background', values))}
+            {renderHierarchicalFilter('Body', filterOptions.bodyHierarchical, filters.body, (values) => setFilter('body', values))}
+            {renderHierarchicalFilter('Face', filterOptions.faceHierarchical, filters.face, (values) => setFilter('face', values))}
+            {renderHierarchicalFilter('Hair', filterOptions.hairHierarchical, filters.hair, (values) => setFilter('hair', values))}
           </>
         ))}
 
