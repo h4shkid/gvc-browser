@@ -248,7 +248,14 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
                               traitCategory === 'hair' ? 'hair_style' : 
                               traitCategory; // for background, use 'background' field
             
-            return nft[styleField] === selectedValue;
+            if (nft[styleField] === selectedValue) {
+              return true;
+            }
+            
+            // ALSO check if it matches the full combined field (e.g., "Plastic Armor Black")
+            // This handles cases where search suggests full trait values
+            const fullField = traitCategory; // body, face, hair, background
+            return nft[fullField] === selectedValue;
           });
         }
         return true;
