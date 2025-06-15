@@ -40,7 +40,7 @@ function ipfsToHttp(url: string): string {
   return url;
 }
 
-const INITIAL_LOAD_SIZE = 50; // Load first 50 items immediately for fast initial render
+const INITIAL_LOAD_SIZE = 60; // Load first 60 items immediately for fast initial render
 const CHUNK_SIZE = 25; // Load additional items in chunks of 25
 const PRELOAD_BUFFER = 20; // Keep 20 NFTs ahead of current scroll position
 const LOAD_TRIGGER_DISTANCE = 600; // Start loading when 600px from the end of loaded content
@@ -192,15 +192,24 @@ const NFTGrid: React.FC = () => {
         return;
       }
 
+      // Try both window and container scroll
       const container = document.querySelector('.content-area');
-      if (!container) {
-        return;
+      let scrollPosition, scrollHeight, clientHeight;
+
+      if (container && container.scrollHeight > container.clientHeight) {
+        // Container has scroll
+        scrollPosition = container.scrollTop;
+        scrollHeight = container.scrollHeight;
+        clientHeight = container.clientHeight;
+      } else {
+        // Use window scroll as fallback
+        scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+        scrollHeight = document.documentElement.scrollHeight;
+        clientHeight = window.innerHeight;
       }
 
-      const scrollPosition = container.scrollTop + container.clientHeight;
-      const scrollHeight = container.scrollHeight;
-      const triggerDistance = 400;
-      const shouldLoadMore = scrollPosition >= scrollHeight - triggerDistance;
+      const triggerDistance = 800; // Increased trigger distance
+      const shouldLoadMore = scrollPosition + clientHeight >= scrollHeight - triggerDistance;
       
       if (shouldLoadMore) {
         setIsLoadingMore(true);
@@ -219,14 +228,20 @@ const NFTGrid: React.FC = () => {
       }
     };
 
+    // Listen to both window and container scroll events
     const container = document.querySelector('.content-area');
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
     if (container) {
-      // Use passive scroll listener for better performance
       container.addEventListener('scroll', handleScroll, { passive: true });
-      return () => {
-        container.removeEventListener('scroll', handleScroll);
-      };
     }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
   }, [visibleCount, nftsWithCurrentListings.length, isLoadingMore]);
 
   // Separate effect to handle loading state cleanup
@@ -347,16 +362,40 @@ const NFTGrid: React.FC = () => {
         ))}
         
         
-        {/* Only show loading indicator if actually loading AND there's more content */}
-        {isLoadingMore && visibleCount < filteredNfts.length && (
+        {/* Show loading indicator or load more button */}
+        {visibleCount < filteredNfts.length && (
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'center', 
             alignItems: 'center',
-            py: 1,
-            height: '40px' // Fixed height to prevent layout shift
+            py: 2,
+            gridColumn: '1 / -1' // Span all columns
           }}>
-            <Mosaic color="#66b3ff" size="small" text="" textColor="" />
+            {isLoadingMore ? (
+              <Mosaic color="#66b3ff" size="small" text="" textColor="" />
+            ) : (
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setIsLoadingMore(true);
+                  requestAnimationFrame(() => {
+                    const nextVisible = Math.min(visibleCount + CHUNK_SIZE, filteredNfts.length);
+                    setVisibleCount(nextVisible);
+                    setTimeout(() => setIsLoadingMore(false), 100);
+                  });
+                }}
+                sx={{
+                  borderColor: '#66b3ff',
+                  color: '#66b3ff',
+                  '&:hover': {
+                    borderColor: '#66b3ff',
+                    backgroundColor: 'rgba(102, 179, 255, 0.1)'
+                  }
+                }}
+              >
+                Load More ({filteredNfts.length - visibleCount} remaining)
+              </Button>
+            )}
           </Box>
         )}
       </div>
