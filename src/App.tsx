@@ -158,19 +158,33 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 3 }}>
         {/* Left section - Brand and Show Filters */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography 
-            variant="h5" 
-            component="h1" 
-            sx={{ 
-              fontWeight: 700, 
-              color: 'var(--text-primary, #fff)',
-              background: 'linear-gradient(45deg, #66b3ff, #4dabf7)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}
-          >
-            Vibie Browser
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography 
+              variant="h5" 
+              component="h1" 
+              sx={{ 
+                fontWeight: 700, 
+                color: 'var(--text-primary, #fff)',
+                background: 'linear-gradient(45deg, #66b3ff, #4dabf7)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
+            >
+              Vibie Browser
+            </Typography>
+            <Chip
+              label="BETA"
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                color: '#ffc107',
+                border: '1px solid rgba(255, 193, 7, 0.3)',
+                fontSize: '0.65rem',
+                fontWeight: 600,
+                height: 20
+              }}
+            />
+          </Box>
           
           {!isFiltersOpen && (
             <Button
