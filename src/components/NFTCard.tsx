@@ -165,10 +165,10 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
 
   // Start loading when visible
   useEffect(() => {
-    if (isVisible && !loadedImageUrl && !imgError) {
+    if (isVisible && !loadedImageUrl && !imgError && imageLoading) {
       loadImageWithOptimizedGateways();
     }
-  }, [isVisible, loadedImageUrl, imgError, loadImageWithOptimizedGateways]);
+  }, [isVisible, loadedImageUrl, imgError, imageLoading, loadImageWithOptimizedGateways]);
 
   return (
     <Card
@@ -191,12 +191,15 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
       onClick={onClick}
     >
       <Box sx={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', background: '#181a20', flex: '0 0 auto' }}>
-        {imageLoading && (
+        {/* Show loading animation when image is loading or not yet visible */}
+        {(imageLoading || (!loadedImageUrl && !imgError)) && (
           <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#181a20' }}>
             <Mosaic color="#66b3ff" size="medium" text="" textColor="" />
           </Box>
         )}
-        {!imgError && loadedImageUrl ? (
+        
+        {/* Show image when loaded successfully */}
+        {!imgError && loadedImageUrl && (
           <CardMedia
             component="img"
             ref={imgRef}
@@ -214,7 +217,10 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
               willChange: 'opacity'
             }}
           />
-        ) : (
+        )}
+        
+        {/* Show error message only when all gateways failed */}
+        {imgError && !loadedImageUrl && (
           <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#181a20', color: '#fff' }}>
             Image not available
           </Box>

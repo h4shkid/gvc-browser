@@ -40,7 +40,7 @@ function ipfsToHttp(url: string): string {
   return url;
 }
 
-const INITIAL_LOAD_SIZE = 60; // Load first 60 items immediately for fast initial render
+const INITIAL_LOAD_SIZE = 20; // Load first 20 items immediately for fast initial render
 const CHUNK_SIZE = 25; // Load additional items in chunks of 25
 const PRELOAD_BUFFER = 20; // Keep 20 NFTs ahead of current scroll position
 const LOAD_TRIGGER_DISTANCE = 600; // Start loading when 600px from the end of loaded content
@@ -185,31 +185,22 @@ const NFTGrid: React.FC = () => {
     listing: listings[nft.id]
   }));
 
-  // Simplified scroll handler that works with sorted NFTs
+  // Simplified scroll handler focused on .content-area
   useEffect(() => {
     const handleScroll = () => {
       if (isLoadingMore || visibleCount >= nftsWithCurrentListings.length) {
         return;
       }
 
-      // Try both window and container scroll
-      const container = document.querySelector('.content-area');
-      let scrollPosition, scrollHeight, clientHeight;
+      const container = document.querySelector('.content-area') as HTMLElement;
+      if (!container) return;
 
-      if (container && container.scrollHeight > container.clientHeight) {
-        // Container has scroll
-        scrollPosition = container.scrollTop;
-        scrollHeight = container.scrollHeight;
-        clientHeight = container.clientHeight;
-      } else {
-        // Use window scroll as fallback
-        scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-        scrollHeight = document.documentElement.scrollHeight;
-        clientHeight = window.innerHeight;
-      }
-
-      const triggerDistance = 800; // Increased trigger distance
-      const shouldLoadMore = scrollPosition + clientHeight >= scrollHeight - triggerDistance;
+      const scrollTop = container.scrollTop;
+      const scrollHeight = container.scrollHeight;
+      const clientHeight = container.clientHeight;
+      const triggerDistance = 500;
+      
+      const shouldLoadMore = scrollTop + clientHeight >= scrollHeight - triggerDistance;
       
       if (shouldLoadMore) {
         setIsLoadingMore(true);
@@ -220,28 +211,21 @@ const NFTGrid: React.FC = () => {
           setVisibleCount(nextVisible);
           setPreloadedCount(nextVisible);
           
-          // Use setTimeout to ensure state updates are processed before resetting loading state
+          // Use setTimeout to ensure state updates are processed
           setTimeout(() => {
             setIsLoadingMore(false);
-          }, 100);
+          }, 50);
         });
       }
     };
 
-    // Listen to both window and container scroll events
     const container = document.querySelector('.content-area');
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
     if (container) {
       container.addEventListener('scroll', handleScroll, { passive: true });
-    }
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (container) {
+      return () => {
         container.removeEventListener('scroll', handleScroll);
-      }
-    };
+      };
+    }
   }, [visibleCount, nftsWithCurrentListings.length, isLoadingMore]);
 
   // Separate effect to handle loading state cleanup

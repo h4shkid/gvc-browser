@@ -30,7 +30,9 @@
       "Bash(git fetch:*)",
       "Bash(cut:*)",
       "Bash(sed:*)",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(gh repo fork:*)",
+      "Bash(git remote remove:*)"
     ],
     "deny": []
   }

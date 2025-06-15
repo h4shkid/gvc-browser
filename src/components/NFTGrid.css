@@ -8,7 +8,7 @@
   margin: 0 auto;
   animation: fadeIn 0.3s ease-in-out;
   background: var(--bg) !important;
-  min-height: calc(100vh - 64px); /* Adjust based on navbar height */
+  /* Removed min-height to allow proper scrolling */
   /* Performance optimizations */
   transform: translateZ(0); /* Force hardware acceleration */
   will-change: transform; /* Hint browser for optimization */
