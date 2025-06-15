@@ -358,7 +358,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
       });
     });
 
-    // Simple trait suggestions
+    // Simple trait suggestions - all available traits from CSV
     const simpleTraits = [
       { key: 'gender', label: 'Gender' },
       { key: 'color_group', label: 'Color Group' },
@@ -403,7 +403,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     });
 
-    // Hierarchical trait suggestions
+    // Hierarchical trait suggestions - include both main types and sub-styles
     const hierarchicalTraits = [
       { key: 'body', label: 'Body' },
       { key: 'background', label: 'Background' },
@@ -413,20 +413,38 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     hierarchicalTraits.forEach(({ key, label }) => {
       const options = filterOptions[key as keyof FilterOptions] as { main: Record<string, number>; byType: Record<string, Record<string, number>> };
-      if (options && options.byType) {
-        Object.entries(options.byType).forEach(([type, styles]) => {
-          Object.entries(styles).forEach(([style, count]) => {
-            if (style.toLowerCase().includes(lowerQuery)) {
+      if (options) {
+        // Add main category types (e.g., "Clothed", "Naked", "Glasses", "Expression", etc.)
+        if (options.main) {
+          Object.entries(options.main).forEach(([type, count]) => {
+            if (type.toLowerCase().includes(lowerQuery)) {
               suggestions.push({
                 type: 'trait',
-                category: label,
-                value: style,
+                category: `${label} Type`,
+                value: type,
                 count,
-                label: `${label}: ${style} (${count})`
+                label: `${label} Type: ${type} (${count})`
               });
             }
           });
-        });
+        }
+        
+        // Add specific styles within each type
+        if (options.byType) {
+          Object.entries(options.byType).forEach(([type, styles]) => {
+            Object.entries(styles).forEach(([style, count]) => {
+              if (style.toLowerCase().includes(lowerQuery)) {
+                suggestions.push({
+                  type: 'trait',
+                  category: label,
+                  value: style,
+                  count,
+                  label: `${label}: ${style} (${count})`
+                });
+              }
+            });
+          });
+        }
       }
     });
 

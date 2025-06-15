@@ -68,12 +68,16 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
           case 'Type': filterKey = 'type_type'; break;
           case 'Type Color': filterKey = 'type_color'; break;
           case 'Body': filterKey = 'body'; break;
+          case 'Body Type': filterKey = 'body'; break;
           case 'Body Color': filterKey = 'body_color'; break;
           case 'Face': filterKey = 'face'; break;
+          case 'Face Type': filterKey = 'face'; break;
           case 'Face Color': filterKey = 'face_color'; break;
           case 'Hair': filterKey = 'hair'; break;
+          case 'Hair Type': filterKey = 'hair'; break;
           case 'Hair Color': filterKey = 'hair_color'; break;
           case 'Background': filterKey = 'background'; break;
+          case 'Background Type': filterKey = 'background'; break;
           case 'Badge': filterKey = 'badges'; break;
           default:
             setFilter('search', '');
@@ -109,12 +113,16 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
         case 'Type': filterKey = 'type_type'; break;
         case 'Type Color': filterKey = 'type_color'; break;
         case 'Body': filterKey = 'body'; break;
+        case 'Body Type': filterKey = 'body'; break; // Map Body Type to body filter
         case 'Body Color': filterKey = 'body_color'; break;
         case 'Face': filterKey = 'face'; break;
+        case 'Face Type': filterKey = 'face'; break; // Map Face Type to face filter
         case 'Face Color': filterKey = 'face_color'; break;
         case 'Hair': filterKey = 'hair'; break;
+        case 'Hair Type': filterKey = 'hair'; break; // Map Hair Type to hair filter
         case 'Hair Color': filterKey = 'hair_color'; break;
         case 'Background': filterKey = 'background'; break;
+        case 'Background Type': filterKey = 'background'; break; // Map Background Type to background filter
         case 'Badge': filterKey = 'badges'; break;
         default:
           // Fallback to search if category not recognized
