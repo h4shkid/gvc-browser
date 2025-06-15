@@ -13,6 +13,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { Mosaic } from 'react-loading-indicators';
 import html2canvas from 'html2canvas';
+import domtoimage from 'dom-to-image-more';
 import { useEthPrice } from '../hooks/useEthPrice';
 import BadgesList from './BadgesList';
 import { loadBadgeData, getNFTBadges, BadgeData } from '../utils/badges';
@@ -183,7 +184,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
     }
   }, [isVisible, loadedImageUrl, imgError, imageLoading, loadImageWithOptimizedGateways]);
 
-  // Copy card as image to clipboard
+  // Copy card as image to clipboard with multiple fallback methods
   const copyCardToClipboard = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -192,53 +193,134 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
     setIsCopying(true);
     
     try {
-      // Wait a bit for any hover effects to settle
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Hide the copy button during capture to avoid including it
+      setIsHovered(false);
       
-      // Capture the card as canvas
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#2a2a2a', // Match card background
-        scale: 2, // Higher quality
-        useCORS: true,
-        allowTaint: true,
-        foreignObjectRendering: true,
-        logging: false,
-        width: cardRef.current.offsetWidth,
-        height: cardRef.current.offsetHeight,
-      });
+      // Wait for any transitions and image loading to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Convert canvas to blob
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          throw new Error('Failed to create image blob');
-        }
+      let blob: Blob | null = null;
+      
+      // Method 1: Try dom-to-image-more first (often better for complex layouts)
+      try {
+        console.log('Trying dom-to-image-more...');
+        const dataUrl = await domtoimage.toPng(cardRef.current, {
+          quality: 0.95,
+          bgcolor: '#2a2a2a',
+          height: cardRef.current.offsetHeight,
+          width: cardRef.current.offsetWidth,
+          style: {
+            transform: 'scale(1)',
+            transformOrigin: 'top left'
+          }
+        });
         
+        // Convert data URL to blob
+        const response = await fetch(dataUrl);
+        blob = await response.blob();
+        console.log('dom-to-image-more succeeded');
+      } catch (domToImageError) {
+        console.warn('dom-to-image-more failed:', domToImageError);
+        
+        // Method 2: Fallback to html2canvas with improved settings
         try {
-          // Copy to clipboard using modern Clipboard API
-          await navigator.clipboard.write([
-            new ClipboardItem({
-              'image/png': blob
-            })
-          ]);
+          console.log('Trying html2canvas...');
           
-          setShowCopySuccess(true);
-          setTimeout(() => setShowCopySuccess(false), 2000);
-        } catch (clipboardError) {
-          console.error('Failed to copy to clipboard:', clipboardError);
-          // Fallback: download the image
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `nft-${nft.id}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
+          const canvas = await html2canvas(cardRef.current, {
+            backgroundColor: '#2a2a2a',
+            scale: 2,
+            useCORS: false, // Disable CORS for local rendering
+            allowTaint: true, // Allow tainted canvas
+            foreignObjectRendering: true,
+            logging: false,
+            width: cardRef.current.offsetWidth,
+            height: cardRef.current.offsetHeight,
+            onclone: (clonedDoc, element) => {
+              // Fix image sources and ensure styles are applied
+              const clonedImages = element.querySelectorAll('img');
+              const originalImages = cardRef.current!.querySelectorAll('img');
+              
+              clonedImages.forEach((clonedImg, index) => {
+                const originalImg = originalImages[index];
+                if (originalImg && originalImg.src) {
+                  clonedImg.src = originalImg.src;
+                  // Force image dimensions
+                  clonedImg.style.width = originalImg.offsetWidth + 'px';
+                  clonedImg.style.height = originalImg.offsetHeight + 'px';
+                  clonedImg.style.objectFit = 'cover';
+                }
+              });
+              
+              // Apply essential styles to text elements
+              const textElements = element.querySelectorAll('*');
+              textElements.forEach((el) => {
+                const htmlEl = el as HTMLElement;
+                const originalEl = cardRef.current!.querySelector(`${el.tagName}:nth-of-type(${Array.from(el.parentElement?.children || []).indexOf(el) + 1})`);
+                if (originalEl) {
+                  const computedStyle = window.getComputedStyle(originalEl);
+                  htmlEl.style.color = computedStyle.color;
+                  htmlEl.style.backgroundColor = computedStyle.backgroundColor;
+                  htmlEl.style.fontSize = computedStyle.fontSize;
+                  htmlEl.style.fontWeight = computedStyle.fontWeight;
+                  htmlEl.style.fontFamily = computedStyle.fontFamily;
+                }
+              });
+            }
+          });
+          
+          // Convert canvas to blob
+          await new Promise<void>((resolve, reject) => {
+            canvas.toBlob((canvasBlob) => {
+              if (canvasBlob) {
+                blob = canvasBlob;
+                console.log('html2canvas succeeded');
+                resolve();
+              } else {
+                reject(new Error('Failed to create canvas blob'));
+              }
+            }, 'image/png', 0.95);
+          });
+          
+        } catch (html2canvasError) {
+          console.error('html2canvas also failed:', html2canvasError);
+          throw new Error('All capture methods failed');
         }
-      }, 'image/png', 0.95);
+      }
+      
+      // Restore hover state
+      setIsHovered(true);
+      
+      if (!blob) {
+        throw new Error('No image data generated');
+      }
+      
+      try {
+        // Copy to clipboard using modern Clipboard API
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'image/png': blob
+          })
+        ]);
+        
+        setShowCopySuccess(true);
+        setTimeout(() => setShowCopySuccess(false), 2000);
+      } catch (clipboardError) {
+        console.error('Failed to copy to clipboard:', clipboardError);
+        // Fallback: download the image
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `nft-${nft.id}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
       
     } catch (error) {
       console.error('Failed to capture card:', error);
+      // Restore hover state on error
+      setIsHovered(true);
     } finally {
       setIsCopying(false);
     }
