@@ -152,8 +152,8 @@ const NFTGrid: React.FC = () => {
       const filterString = JSON.stringify(filters);
       
       if (prevFilterString.current !== filterString) {
-        setVisibleCount(PAGE_SIZE);
-        setPreloadedCount(PAGE_SIZE);
+        setVisibleCount(INITIAL_LOAD_SIZE);
+        setPreloadedCount(INITIAL_LOAD_SIZE);
         prevFilterString.current = filterString;
       }
     }
