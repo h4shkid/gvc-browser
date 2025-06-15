@@ -9,6 +9,10 @@
   animation: fadeIn 0.3s ease-in-out;
   background: var(--bg) !important;
   min-height: calc(100vh - 64px); /* Adjust based on navbar height */
+  /* Performance optimizations */
+  transform: translateZ(0); /* Force hardware acceleration */
+  will-change: transform; /* Hint browser for optimization */
+  contain: layout style paint; /* CSS containment for better rendering */
 }
 
 .loading-more {
@@ -39,12 +43,19 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translate3d(0, 10px, 0); /* Use 3D transform for GPU acceleration */
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
+}
+
+/* Performance optimizations for individual NFT cards */
+.nft-card {
+  will-change: transform, opacity;
+  backface-visibility: hidden; /* Prevent flickering during animations */
+  transform: translateZ(0); /* Force hardware acceleration */
 }
 
 @media (max-width: 1200px) {

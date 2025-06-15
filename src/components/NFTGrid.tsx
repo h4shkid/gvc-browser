@@ -40,7 +40,8 @@ function ipfsToHttp(url: string): string {
   return url;
 }
 
-const PAGE_SIZE = 20;
+const INITIAL_LOAD_SIZE = 50; // Load first 50 items immediately for fast initial render
+const CHUNK_SIZE = 25; // Load additional items in chunks of 25
 const PRELOAD_BUFFER = 20; // Keep 20 NFTs ahead of current scroll position
 const LOAD_TRIGGER_DISTANCE = 600; // Start loading when 600px from the end of loaded content
 const SKELETON_COUNT = 8;
@@ -50,8 +51,8 @@ const NFTGrid: React.FC = () => {
   const { listings, error: listingsError, loadListings, isLoading: listingsLoading } = useListings();
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [filteredNfts, setFilteredNfts] = useState<NFT[]>([]);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [preloadedCount, setPreloadedCount] = useState(PAGE_SIZE); // Start with just visible items
+  const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_SIZE);
+  const [preloadedCount, setPreloadedCount] = useState(INITIAL_LOAD_SIZE); // Start with initial load size
   const [loading, setLoading] = useState(true);
   const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -206,7 +207,7 @@ const NFTGrid: React.FC = () => {
         
         // Use requestAnimationFrame to batch state updates
         requestAnimationFrame(() => {
-          const nextVisible = Math.min(visibleCount + (PAGE_SIZE * 2), nftsWithCurrentListings.length);
+          const nextVisible = Math.min(visibleCount + CHUNK_SIZE, nftsWithCurrentListings.length);
           setVisibleCount(nextVisible);
           setPreloadedCount(nextVisible);
           

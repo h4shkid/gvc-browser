@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -51,6 +51,10 @@ const IPFS_GATEWAYS = [
   'https://gateway.pinata.cloud/ipfs/'
 ];
 
+// Gateway performance cache
+const gatewayCache = new Map<string, number>();
+const GATEWAY_TIMEOUT = 3000; // 3 seconds per gateway
+
 function getIpfsPath(url: string): string {
   if (!url) return '';
   if (url.startsWith('ipfs://')) {
@@ -62,9 +66,11 @@ function getIpfsPath(url: string): string {
 
 const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
   const [imageLoading, setImageLoading] = useState(true);
-  const [gatewayIndex, setGatewayIndex] = useState(0);
   const [imgError, setImgError] = useState(false);
   const [badgeData, setBadgeData] = useState<BadgeData>({});
+  const [isVisible, setIsVisible] = useState(false);
+  const [loadedImageUrl, setLoadedImageUrl] = useState<string>('');
+  const cardRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const ethPrice = useEthPrice();
 
@@ -72,28 +78,101 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
     loadBadgeData().then(setBadgeData);
   }, []);
 
+  // IntersectionObserver for lazy loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin: '50px', // Start loading 50px before the image comes into view
+        threshold: 0.1
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   const ipfsPath = getIpfsPath(nft.image);
-  const imageUrl = ipfsPath ? IPFS_GATEWAYS[gatewayIndex] + ipfsPath : '';
   const nftBadges = getNFTBadges(nft, badgeData);
 
-  const handleImageError = () => {
-    if (gatewayIndex < IPFS_GATEWAYS.length - 1) {
-      setGatewayIndex(gatewayIndex + 1);
-    } else {
-      setImgError(true);
-      setImageLoading(false);
-      onImageLoad?.(nft.id); // Consider error as "loaded" for grid display purposes
+  // Optimized image loading with parallel gateway testing
+  const loadImageWithOptimizedGateways = useCallback(async () => {
+    if (!ipfsPath) return;
+
+    // Get cached best gateway or use default order
+    const cacheKey = ipfsPath.split('/')[0]; // Use first part as cache key
+    const cachedGatewayIndex = gatewayCache.get(cacheKey) || 0;
+    
+    // Try cached gateway first, then others
+    const gatewayOrder = [
+      cachedGatewayIndex,
+      ...Array.from({length: IPFS_GATEWAYS.length}, (_, i) => i).filter(i => i !== cachedGatewayIndex)
+    ];
+
+    for (const gatewayIndex of gatewayOrder) {
+      try {
+        const url = IPFS_GATEWAYS[gatewayIndex] + ipfsPath;
+        const success = await tryLoadImage(url);
+        if (success) {
+          setLoadedImageUrl(url);
+          setImageLoading(false);
+          setImgError(false);
+          onImageLoad?.(nft.id);
+          // Cache successful gateway
+          gatewayCache.set(cacheKey, gatewayIndex);
+          return;
+        }
+      } catch (error) {
+        continue; // Try next gateway
+      }
     }
+
+    // All gateways failed
+    setImgError(true);
+    setImageLoading(false);
+    onImageLoad?.(nft.id);
+  }, [ipfsPath, nft.id, onImageLoad]);
+
+  // Helper function to test image loading with timeout
+  const tryLoadImage = (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const timeout = setTimeout(() => {
+        resolve(false);
+      }, GATEWAY_TIMEOUT);
+
+      img.onload = () => {
+        clearTimeout(timeout);
+        resolve(true);
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeout);
+        resolve(false);
+      };
+
+      img.src = url;
+    });
   };
 
-  const handleImageLoad = () => {
-    setImageLoading(false);
-    setImgError(false);
-    onImageLoad?.(nft.id);
-  };
+  // Start loading when visible
+  useEffect(() => {
+    if (isVisible && !loadedImageUrl && !imgError) {
+      loadImageWithOptimizedGateways();
+    }
+  }, [isVisible, loadedImageUrl, imgError, loadImageWithOptimizedGateways]);
 
   return (
     <Card
+      ref={cardRef}
       sx={{
         background: 'var(--card-bg, #2a2a2a)',
         color: 'var(--text-primary, #fff)',
@@ -117,14 +196,12 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
             <Mosaic color="#66b3ff" size="medium" text="" textColor="" />
           </Box>
         )}
-        {!imgError && imageUrl ? (
+        {!imgError && loadedImageUrl ? (
           <CardMedia
             component="img"
             ref={imgRef}
-            src={imageUrl}
+            src={loadedImageUrl}
             alt={nft.name}
-            onLoad={handleImageLoad}
-            onError={handleImageError}
             sx={{
               position: 'absolute',
               top: 0,
@@ -132,7 +209,9 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              display: imageLoading ? 'none' : 'block',
+              opacity: imageLoading ? 0 : 1,
+              transition: 'opacity 0.3s ease-in-out',
+              willChange: 'opacity'
             }}
           />
         ) : (
@@ -218,4 +297,11 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
   );
 };
 
-export default NFTCard; 
+// Memoize the component for better performance
+export default React.memo(NFTCard, (prevProps, nextProps) => {
+  return (
+    prevProps.nft.id === nextProps.nft.id &&
+    prevProps.listing?.price === nextProps.listing?.price &&
+    prevProps.listing?.url === nextProps.listing?.url
+  );
+}); 
