@@ -6,10 +6,13 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import InfoIcon from '@mui/icons-material/Info';
+import Tooltip from '@mui/material/Tooltip';
 import { Mosaic } from 'react-loading-indicators';
 import { useEthPrice } from '../hooks/useEthPrice';
 import BadgesList from './BadgesList';
 import { loadBadgeData, getNFTBadges, BadgeData } from '../utils/badges';
+import { calculateBPR, formatBPR, getBPRColor, getBPRRating } from '../utils/bpr';
 
 interface Listing {
   price: number;
@@ -102,6 +105,9 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
 
   const ipfsPath = getIpfsPath(nft.image);
   const nftBadges = getNFTBadges(nft, badgeData);
+  const bprData = calculateBPR(nftBadges, listing?.price || 0);
+  const bprColor = getBPRColor(bprData.score, !!listing);
+  const bprRating = getBPRRating(bprData.score, !!listing);
 
   // Optimized image loading with parallel gateway testing
   const loadImageWithOptimizedGateways = useCallback(async () => {
@@ -281,22 +287,87 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
             </Typography>
           )}
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" sx={{ color: 'var(--text-secondary, #aaa)', fontWeight: 600 }}>
-            {nft.id}
-          </Typography>
-          {listing && (
-            <IconButton
-              href={listing.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{ color: '#66b3ff', p: 0.5 }}
-              onClick={e => e.stopPropagation()}
-              size="small"
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" sx={{ color: 'var(--text-secondary, #aaa)', fontWeight: 600 }}>
+              {nft.id}
+            </Typography>
+            {listing && (
+              <IconButton
+                href={listing.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: '#66b3ff', p: 0.5 }}
+                onClick={e => e.stopPropagation()}
+                size="small"
+              >
+                <img src="/images/opensea-logo.svg" alt="OpenSea" style={{ width: 20, height: 20, display: 'block' }} />
+              </IconButton>
+            )}
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: bprColor, 
+                fontWeight: 600, 
+                fontSize: '0.8em' 
+              }}
             >
-              <img src="/images/opensea-logo.svg" alt="OpenSea" style={{ width: 20, height: 20, display: 'block' }} />
-            </IconButton>
-          )}
+              BPR: {formatBPR(bprData.score, !!listing)}
+            </Typography>
+            <Tooltip
+              title={
+                <Box sx={{ p: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                    Badge Price Ratio (BPR)
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    BPR measures the value of an NFT based on its badge strength relative to its price.
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Formula:</strong> (Badge Count × Average Rarity Score) ÷ Price in ETH
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>This NFT:</strong>
+                  </Typography>
+                  <Typography variant="body2" sx={{ ml: 1, mb: 0.5 }}>
+                    • {bprData.badgeCount} badge{bprData.badgeCount !== 1 ? 's' : ''}
+                  </Typography>
+                  <Typography variant="body2" sx={{ ml: 1, mb: 0.5 }}>
+                    • Total rarity: {bprData.totalRarityScore}
+                  </Typography>
+                  {listing && (
+                    <Typography variant="body2" sx={{ ml: 1, mb: 0.5 }}>
+                      • Price: {listing.price.toFixed(3)} ETH
+                    </Typography>
+                  )}
+                  <Typography variant="body2" sx={{ mt: 1, fontWeight: 600, color: bprColor }}>
+                    Rating: {bprRating}
+                  </Typography>
+                </Box>
+              }
+              arrow
+              placement="left"
+              sx={{
+                '& .MuiTooltip-tooltip': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                  maxWidth: 300,
+                  fontSize: '0.75rem'
+                }
+              }}
+            >
+              <InfoIcon 
+                sx={{ 
+                  fontSize: 14, 
+                  color: 'var(--text-secondary, #aaa)', 
+                  cursor: 'pointer',
+                  '&:hover': { color: 'var(--text-primary, #fff)' }
+                }} 
+                onClick={e => e.stopPropagation()}
+              />
+            </Tooltip>
+          </Box>
         </Box>
       </CardContent>
     </Card>
@@ -308,6 +379,11 @@ export default React.memo(NFTCard, (prevProps, nextProps) => {
   return (
     prevProps.nft.id === nextProps.nft.id &&
     prevProps.listing?.price === nextProps.listing?.price &&
-    prevProps.listing?.url === nextProps.listing?.url
+    prevProps.listing?.url === nextProps.listing?.url &&
+    prevProps.nft.badge1 === nextProps.nft.badge1 &&
+    prevProps.nft.badge2 === nextProps.nft.badge2 &&
+    prevProps.nft.badge3 === nextProps.nft.badge3 &&
+    prevProps.nft.badge4 === nextProps.nft.badge4 &&
+    prevProps.nft.badge5 === nextProps.nft.badge5
   );
 }); 
