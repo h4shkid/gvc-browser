@@ -3,7 +3,6 @@ import { ListingsProvider, useListings } from './contexts/ListingsContext';
 import { FiltersProvider, useFilters, SearchSuggestion } from './contexts/FiltersContext';
 import NFTGrid from './components/NFTGrid';
 import FilterSidebar from './components/FilterSidebar';
-import Particles from './components/Particles';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -553,16 +552,6 @@ const App: React.FC = () => {
 
   return (
     <>
-      <Particles
-        particleColors={["#ffffff", "#ffffff"]}
-        particleCount={150} // Reduced from 200 for better performance
-        particleSpread={10}
-        speed={0.08} // Slightly slower for smoother animation
-        particleBaseSize={80} // Smaller particles
-        moveParticlesOnHover={true}
-        alphaParticles={false}
-        disableRotation={false}
-      />
       <ListingsProvider>
         <FiltersProvider>
           <div className="app">
