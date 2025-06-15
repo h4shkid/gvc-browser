@@ -32,7 +32,8 @@
       "Bash(sed:*)",
       "Bash(git revert:*)",
       "Bash(gh repo fork:*)",
-      "Bash(git remote remove:*)"
+      "Bash(git remote remove:*)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": []
   }
