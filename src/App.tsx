@@ -208,7 +208,7 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box
               component="img"
-              src="/badges/any_gvc.png"
+              src={`${import.meta.env.BASE_URL}badges/any_gvc.png`}
               alt="GVC Logo"
               sx={{
                 width: 40,
