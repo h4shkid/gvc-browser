@@ -11,6 +11,8 @@ import Button from '@mui/material/Button';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import Skeleton from '@mui/material/Skeleton';
 import { Mosaic } from 'react-loading-indicators';
+import BadgesList from './BadgesList';
+import { loadBadgeData, getNFTBadges, BadgeData } from '../utils/badges';
 import './NFTGrid.css';
 
 interface Listing {
@@ -56,7 +58,12 @@ const NFTGrid: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [badgeData, setBadgeData] = useState<BadgeData>({});
   const prevFilterString = useRef<string>('');
+
+  useEffect(() => {
+    loadBadgeData().then(setBadgeData);
+  }, []);
 
   useEffect(() => {
     const loadNFTs = async () => {
@@ -399,8 +406,36 @@ const NFTGrid: React.FC = () => {
               <img
                 src={selectedNFT.image}
                 alt={selectedNFT.name}
-                style={{ width: '100%', maxWidth: 320, borderRadius: 16, background: '#181a20', marginBottom: 24 }}
+                style={{ width: '100%', maxWidth: 320, borderRadius: 16, background: '#181a20', marginBottom: 16 }}
               />
+              {/* Badges section */}
+              {(() => {
+                const nftBadges = getNFTBadges(selectedNFT, badgeData);
+                return nftBadges.length > 0 && (
+                  <Box sx={{
+                    width: '100%',
+                    maxWidth: 320,
+                    p: 2,
+                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                    borderRadius: 2,
+                    border: '1px solid var(--border-color, #404040)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1,
+                    '& > *': {
+                      transform: 'scale(1.5)',
+                      transformOrigin: 'center'
+                    }
+                  }}>
+                    <BadgesList 
+                      badges={nftBadges} 
+                      size="large" 
+                      maxVisible={6}
+                    />
+                  </Box>
+                );
+              })()}
             </Box>
             {/* Details section */}
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
