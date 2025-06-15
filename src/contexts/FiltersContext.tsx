@@ -30,6 +30,12 @@ interface FilterOptions {
   };
 }
 
+interface ConditionalFilterOptions {
+  shouldShowFaceColor: (selectedFace: string) => boolean;
+  shouldShowHairColor: (selectedHair: string) => boolean;
+  getFilteredColorCount: () => Record<string, number>;
+}
+
 interface Filters {
   gender: string[];
   color_group: string[];
@@ -61,6 +67,7 @@ export interface SearchSuggestion {
 interface FiltersContextType {
   filters: Filters;
   filterOptions: FilterOptions;
+  conditionalFilters: ConditionalFilterOptions;
   totalNfts: number;
   filteredCount: number;
   setFilter: (category: keyof Filters, value: string | string[] | boolean) => void;
@@ -121,6 +128,37 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
     loadBadgeData().then(setBadgeData);
   }, []);
 
+  // Conditional filter logic (implementing old system's smart filtering)
+  const conditionalFilters: ConditionalFilterOptions = {
+    shouldShowFaceColor: (selectedFace: string) => {
+      // Face color only shows when "Glasses" is selected in face filter
+      return filters.face.some(faceStyle => {
+        // Check if any selected face style belongs to "Glasses" type
+        return filterOptions.face.byType['Glasses'] && 
+               Object.keys(filterOptions.face.byType['Glasses']).includes(faceStyle);
+      });
+    },
+    shouldShowHairColor: (selectedHair: string) => {
+      // Hair color only shows when "Hair" type is selected in hair filter
+      return filters.hair.some(hairStyle => {
+        // Check if any selected hair style belongs to "Hair" type
+        return filterOptions.hair.byType['Hair'] && 
+               Object.keys(filterOptions.hair.byType['Hair']).includes(hairStyle);
+      });
+    },
+    getFilteredColorCount: () => {
+      // Only show color counts 3, 4, and 5 (old system logic)
+      const filtered: Record<string, number> = {};
+      Object.entries(filterOptions.color_count).forEach(([key, value]) => {
+        const count = parseInt(key);
+        if (count >= 3 && count <= 5) {
+          filtered[key] = value;
+        }
+      });
+      return filtered;
+    }
+  };
+
   const setFilter = (category: keyof Filters, value: string | string[] | boolean) => {
     setFilters(prev => ({
       ...prev,
@@ -147,13 +185,12 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Listed filter
       if (filters.listed && !nft.listing) return false;
 
-      // Trait filters
-      const traitFilters = [
-        'gender', 'color_group', 'color_count', 'type_color', 'type_type',
-        'body_color', 'hair_color', 'face_color', 'body', 'background', 'face', 'hair'
+      // Simple trait filters
+      const simpleTraitFilters = [
+        'gender', 'color_group', 'color_count', 'type_color', 'type_type', 'body_color', 'hair_color', 'face_color'
       ];
 
-      const traitMatch = traitFilters.every(trait => {
+      const simpleTraitMatch = simpleTraitFilters.every(trait => {
         const filterValue = filters[trait as keyof Filters];
         if (Array.isArray(filterValue) && filterValue.length > 0) {
           return filterValue.includes(nft[trait]);
@@ -161,7 +198,35 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return true;
       });
 
-      if (!traitMatch) return false;
+      if (!simpleTraitMatch) return false;
+
+      // Hierarchical trait filters (matching old system logic)
+      const hierarchicalTraitFilters = ['body', 'background', 'face', 'hair'];
+      
+      const hierarchicalTraitMatch = hierarchicalTraitFilters.every(traitCategory => {
+        const filterValue = filters[traitCategory as keyof Filters];
+        if (Array.isArray(filterValue) && filterValue.length > 0) {
+          // Check if any selected filter matches either the main type or the specific style
+          return filterValue.some(selectedValue => {
+            // Check if it matches the main type (e.g., "Clothed", "Glasses")
+            const typeField = `${traitCategory}_type`;
+            if (nft[typeField] === selectedValue) {
+              return true;
+            }
+            
+            // Check if it matches the specific style (e.g., "Short Sleeve Button Up")
+            const styleField = traitCategory === 'body' ? 'body_style' : 
+                              traitCategory === 'face' ? 'face_style' : 
+                              traitCategory === 'hair' ? 'hair_style' : 
+                              traitCategory; // for background, use 'background' field
+            
+            return nft[styleField] === selectedValue;
+          });
+        }
+        return true;
+      });
+
+      if (!hierarchicalTraitMatch) return false;
 
       // Badge filters
       if (filters.badges.length > 0) {
@@ -488,42 +553,59 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
             const badgeCountKey = nftBadgeCount.toString();
             counts.badgeCount[badgeCountKey] = (counts.badgeCount[badgeCountKey] || 0) + 1;
 
-            // Hierarchical counts
+            // Hierarchical counts with old system's exact structure
+            
+            // Background: Main categories are background colors, subcategories only for "1 of 1"
             if (columns[2]) {
-              hierarchicalCounts.background.main[columns[2]] = (hierarchicalCounts.background.main[columns[2]] || 0) + 1;
-              if (columns[3]) {
-                if (!hierarchicalCounts.background.byType[columns[3]]) {
-                  hierarchicalCounts.background.byType[columns[3]] = {};
+              const backgroundType = columns[3] || ''; // background_type
+              hierarchicalCounts.background.main[backgroundType] = (hierarchicalCounts.background.main[backgroundType] || 0) + 1;
+              
+              // Only show subcategories for "1 of 1" backgrounds (old system logic)
+              if (backgroundType === '1 of 1') {
+                if (!hierarchicalCounts.background.byType[backgroundType]) {
+                  hierarchicalCounts.background.byType[backgroundType] = {};
                 }
-                hierarchicalCounts.background.byType[columns[3]][columns[2]] = (hierarchicalCounts.background.byType[columns[3]][columns[2]] || 0) + 1;
+                hierarchicalCounts.background.byType[backgroundType][columns[2]] = (hierarchicalCounts.background.byType[backgroundType][columns[2]] || 0) + 1;
               }
             }
-            if (columns[4]) {
-              hierarchicalCounts.body.main[columns[4]] = (hierarchicalCounts.body.main[columns[4]] || 0) + 1;
-              if (columns[5]) {
-                if (!hierarchicalCounts.body.byType[columns[5]]) {
-                  hierarchicalCounts.body.byType[columns[5]] = {};
-                }
-                hierarchicalCounts.body.byType[columns[5]][columns[4]] = (hierarchicalCounts.body.byType[columns[5]][columns[4]] || 0) + 1;
+            
+            // Body: body_type as main categories, body_style as subcategories
+            if (columns[5] && columns[6]) {
+              const bodyType = columns[5]; // body_type (Clothed, Naked, 1 of 1)
+              const bodyStyle = columns[6]; // body_style (specific styles)
+              
+              hierarchicalCounts.body.main[bodyType] = (hierarchicalCounts.body.main[bodyType] || 0) + 1;
+              
+              if (!hierarchicalCounts.body.byType[bodyType]) {
+                hierarchicalCounts.body.byType[bodyType] = {};
               }
+              hierarchicalCounts.body.byType[bodyType][bodyStyle] = (hierarchicalCounts.body.byType[bodyType][bodyStyle] || 0) + 1;
             }
-            if (columns[8]) {
-              hierarchicalCounts.face.main[columns[8]] = (hierarchicalCounts.face.main[columns[8]] || 0) + 1;
-              if (columns[9]) {
-                if (!hierarchicalCounts.face.byType[columns[9]]) {
-                  hierarchicalCounts.face.byType[columns[9]] = {};
-                }
-                hierarchicalCounts.face.byType[columns[9]][columns[8]] = (hierarchicalCounts.face.byType[columns[9]][columns[8]] || 0) + 1;
+            
+            // Face: face_type as main categories (Glasses, Expression, Special, Facial Hair, 1 of 1)
+            if (columns[9] && columns[10]) {
+              const faceType = columns[9]; // face_type (Glasses, Expression, Special, etc.)
+              const faceStyle = columns[10]; // face_style (specific styles)
+              
+              hierarchicalCounts.face.main[faceType] = (hierarchicalCounts.face.main[faceType] || 0) + 1;
+              
+              if (!hierarchicalCounts.face.byType[faceType]) {
+                hierarchicalCounts.face.byType[faceType] = {};
               }
+              hierarchicalCounts.face.byType[faceType][faceStyle] = (hierarchicalCounts.face.byType[faceType][faceStyle] || 0) + 1;
             }
-            if (columns[12]) {
-              hierarchicalCounts.hair.main[columns[12]] = (hierarchicalCounts.hair.main[columns[12]] || 0) + 1;
-              if (columns[13]) {
-                if (!hierarchicalCounts.hair.byType[columns[13]]) {
-                  hierarchicalCounts.hair.byType[columns[13]] = {};
-                }
-                hierarchicalCounts.hair.byType[columns[13]][columns[12]] = (hierarchicalCounts.hair.byType[columns[13]][columns[12]] || 0) + 1;
+            
+            // Hair: hair_type as main categories (Hair, Headgear, Special, 1 of 1)
+            if (columns[13] && columns[14]) {
+              const hairType = columns[13]; // hair_type (Hair, Headgear, Special, etc.)
+              const hairStyle = columns[14]; // hair_style (specific styles)
+              
+              hierarchicalCounts.hair.main[hairType] = (hierarchicalCounts.hair.main[hairType] || 0) + 1;
+              
+              if (!hierarchicalCounts.hair.byType[hairType]) {
+                hierarchicalCounts.hair.byType[hairType] = {};
               }
+              hierarchicalCounts.hair.byType[hairType][hairStyle] = (hierarchicalCounts.hair.byType[hairType][hairStyle] || 0) + 1;
             }
           }
         });
@@ -555,7 +637,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   return (
-    <FiltersContext.Provider value={{ filters, filterOptions, totalNfts, filteredCount, setFilter, clearFilters, applyFilters, applySorting, getSearchSuggestions, setFilteredCount }}>
+    <FiltersContext.Provider value={{ filters, filterOptions, conditionalFilters, totalNfts, filteredCount, setFilter, clearFilters, applyFilters, applySorting, getSearchSuggestions, setFilteredCount }}>
       {children}
     </FiltersContext.Provider>
   );
