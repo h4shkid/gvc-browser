@@ -2,10 +2,10 @@
   "name": "gvc-nft-browser",
   "version": "1.0.0",
   "description": "A modern NFT browser for the Good Vibes Club collection with advanced filtering, badge display, and real-time market data",
-  "homepage": "https://github.com/your-username/gvc-nft-browser",
+  "homepage": "https://dapppunk.github.io/gvc-browser",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-username/gvc-nft-browser.git"
+    "url": "git+https://github.com/dapppunk/gvc-browser.git"
   },
   "keywords": [
     "nft",

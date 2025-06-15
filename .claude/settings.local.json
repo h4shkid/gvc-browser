@@ -1,40 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(chmod:*)",
-      "Bash(npm run dev:*)",
-      "Bash(rm:*)",
-      "Bash(npm install)",
-      "Bash(find:*)",
-      "Bash(ls:*)",
-      "Bash(grep:*)",
-      "Bash(pkill:*)",
-      "Bash(npm install:*)",
-      "Bash(rg:*)",
-      "Bash(curl:*)",
       "Bash(npm run build:*)",
-      "Bash(git init:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git config:*)",
-      "Bash(gh repo create:*)",
-      "Bash(git remote add:*)",
-      "Bash(git branch:*)",
-      "Bash(git push:*)",
-      "Bash(git restore:*)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(git clone:*)",
-      "Bash(awk:*)",
-      "Bash(npm run lint)",
-      "Bash(git fetch:*)",
-      "Bash(cut:*)",
-      "Bash(sed:*)",
-      "Bash(git revert:*)",
-      "Bash(gh repo fork:*)",
-      "Bash(git remote remove:*)",
-      "Bash(npm uninstall:*)",
-      "Bash(git merge:*)"
+      "Bash(git add:*)"
     ],
     "deny": []
   }

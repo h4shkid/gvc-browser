@@ -30,6 +30,16 @@ export const ListingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       setIsLoading(true);
       setError(null);
+      
+      // Check if API key is available
+      const apiKey = import.meta.env.VITE_OPENSEA_API_KEY;
+      if (!apiKey) {
+        console.warn('OpenSea API key not configured. Listings will not be available.');
+        setListings({});
+        setIsLoading(false);
+        return;
+      }
+      
       const formattedListings: { [key: string]: Listing } = {};
       let pageCount = 0;
       let next: string | null = null;
@@ -38,7 +48,7 @@ export const ListingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const bestUrl = `${OPENSEA_API_BASE}/listings/collection/${OPENSEA_COLLECTION_SLUG}/best?limit=100`;
       const options = {
         headers: {
-          'X-API-KEY': import.meta.env.VITE_OPENSEA_API_KEY,
+          'X-API-KEY': apiKey,
           'Accept': 'application/json',
         },
       };
