@@ -18,14 +18,24 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { loadBadgeData, getBadgeDisplayName, BadgeData } from '../utils/badges';
 import './FilterSidebar.css';
 
-const FilterSidebar: React.FC = () => {
+interface FilterSidebarProps {
+  onClose?: () => void;
+}
+
+const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) => {
   const { filters, filterOptions, conditionalFilters, setFilter, clearFilters } = useFilters();
   const { listings } = useListings();
   const [badgeData, setBadgeData] = useState<BadgeData>({});
   const listedCount = Object.keys(listings).length;
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     loadBadgeData().then(setBadgeData);
@@ -124,8 +134,8 @@ const FilterSidebar: React.FC = () => {
                     />
                   }
                   label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 160 }}>
-                      <span style={{ fontSize: '0.875rem' }}>{formatLabel ? formatLabel(option) : option}</span>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: { xs: 120, sm: 160 } }}>
+                      <span style={{ fontSize: '0.875rem', wordBreak: 'break-word' }}>{formatLabel ? formatLabel(option) : option}</span>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>({count})</span>
                     </Box>
                   }
@@ -338,13 +348,11 @@ const FilterSidebar: React.FC = () => {
   return (
     <Box
       sx={{
-        width: { xs: '100vw', sm: '320px' },
-        maxWidth: { xs: '100vw', sm: '320px' },
-        flexShrink: 0,
-        borderRight: '1px solid var(--border-color)',
+        width: '100%',
         height: '100%',
         overflowY: 'auto',
-        background: 'var(--card-bg)',
+        overflowX: 'hidden',
+        WebkitOverflowScrolling: 'touch',
         '&::-webkit-scrollbar': {
           width: '8px',
         },
@@ -360,17 +368,38 @@ const FilterSidebar: React.FC = () => {
         }
       }}
     >
-      <Box sx={{ p: 3 }}>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            mb: 3, 
-            fontWeight: 700,
-            color: 'var(--text-primary)'
-          }}
-        >
-          Filters
-        </Typography>
+      <Box sx={{ p: { xs: 2, sm: 3 } }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          mb: 3 
+        }}>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 700,
+              color: 'var(--text-primary)'
+            }}
+          >
+            Filters
+          </Typography>
+          {isMobile && onClose && (
+            <IconButton
+              onClick={onClose}
+              size="small"
+              sx={{
+                color: 'var(--text-secondary)',
+                '&:hover': {
+                  color: 'var(--text-primary)',
+                  backgroundColor: 'rgba(102, 179, 255, 0.1)'
+                }
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          )}
+        </Box>
         
         <Button
           variant="outlined"

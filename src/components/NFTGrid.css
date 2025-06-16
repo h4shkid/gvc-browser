@@ -8,11 +8,19 @@
   margin: 0 auto;
   animation: fadeIn 0.3s ease-in-out;
   background: var(--bg) !important;
-  /* Removed min-height to allow proper scrolling */
   /* Performance optimizations */
   transform: translateZ(0); /* Force hardware acceleration */
   will-change: transform; /* Hint browser for optimization */
   contain: layout style paint; /* CSS containment for better rendering */
+}
+
+/* Mobile scrolling fix */
+@media (max-width: 768px) {
+  .nft-grid {
+    min-height: auto;
+    height: auto;
+    padding-bottom: 60px; /* Extra space for mobile scrolling */
+  }
 }
 
 .loading-more {
@@ -58,16 +66,72 @@
   transform: translateZ(0); /* Force hardware acceleration */
 }
 
-@media (max-width: 1200px) {
+/* Desktop Large */
+@media (max-width: 1400px) {
   .nft-grid {
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   }
 }
 
-@media (max-width: 768px) {
+/* Desktop Medium */
+@media (max-width: 1200px) {
   .nft-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 15px;
-    padding: 20px 15px 15px 15px;
+  }
+}
+
+/* Tablet iPad Pro */
+@media (max-width: 1024px) {
+  .nft-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px;
+    padding: 24px 18px 18px 18px;
+  }
+}
+
+/* Tablet iPad */
+@media (max-width: 768px) {
+  .nft-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 20px 16px 16px 16px;
+  }
+}
+
+/* Large Mobile */
+@media (max-width: 600px) {
+  .nft-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    padding: 16px 14px 14px 14px;
+  }
+}
+
+/* Standard Mobile */
+@media (max-width: 480px) {
+  .nft-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    padding: 14px 12px 12px 12px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 390px) {
+  .nft-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    padding: 12px 10px 10px 10px;
+  }
+}
+
+/* iPhone SE and smaller */
+@media (max-width: 320px) {
+  .nft-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+    max-width: 280px;
+    margin: 0 auto;
   }
 } 

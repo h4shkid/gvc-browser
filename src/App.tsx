@@ -21,6 +21,11 @@ import Paper from '@mui/material/Paper';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import IconButton from '@mui/material/IconButton';
 import ClearIcon from '@mui/icons-material/Clear';
+import MenuIcon from '@mui/icons-material/Menu';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import Drawer from '@mui/material/Drawer';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import './App.css';
 
 interface HeaderProps {
@@ -35,6 +40,11 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
   const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [activeSearchFilter, setActiveSearchFilter] = useState<SearchSuggestion | null>(null);
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // 768px and below
+  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 768px - 1024px
+  const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm')); // 600px and below
 
   // Update search filter when search value changes
   useEffect(() => {
@@ -205,17 +215,24 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
         zIndex: 1000
       }}
     >
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 3 }}>
+      <Toolbar sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        px: isMobile ? 1 : 3,
+        py: isMobile ? 0.5 : 1,
+        minHeight: isMobile ? 56 : 64
+      }}>
         {/* Left section - Brand and Show Filters */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? 1 : 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box
               component="img"
               src={`${import.meta.env.BASE_URL}badges/any_gvc.png`}
               alt="GVC Logo"
               sx={{
-                width: 40,
-                height: 40,
+                width: isMobile ? 32 : 40,
+                height: isMobile ? 32 : 40,
                 borderRadius: '50%',
                 border: '2px solid rgba(102, 179, 255, 0.3)',
                 background: 'rgba(255, 255, 255, 0.1)',
@@ -223,52 +240,53 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
               }}
             />
             <Typography 
-              variant="h5" 
+              variant={isMobile ? "h6" : "h5"}
               component="h1" 
               sx={{ 
                 fontWeight: 700, 
                 color: 'var(--text-primary, #fff)',
                 background: 'linear-gradient(45deg, #66b3ff, #4dabf7)',
                 WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
+                WebkitTextFillColor: 'transparent',
+                fontSize: isMobile ? '1.1rem' : '1.5rem'
               }}
             >
-              Vibes Browser
+              {isSmallMobile ? 'GVC' : 'Vibes Browser'}
             </Typography>
-            <Chip
-              label="BETA"
-              size="small"
-              sx={{
-                backgroundColor: 'rgba(255, 193, 7, 0.2)',
-                color: '#ffc107',
-                border: '1px solid rgba(255, 193, 7, 0.3)',
-                fontSize: '0.65rem',
-                fontWeight: 600,
-                height: 20
-              }}
-            />
+            {!isSmallMobile && (
+              <Chip
+                label="BETA"
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                  color: '#ffc107',
+                  border: '1px solid rgba(255, 193, 7, 0.3)',
+                  fontSize: '0.65rem',
+                  fontWeight: 600,
+                  height: 20
+                }}
+              />
+            )}
           </Box>
           
-          {!isFiltersOpen && (
-            <Button
-              variant="outlined"
+          {isMobile && (
+            <IconButton
               onClick={() => setIsFiltersOpen(true)}
               sx={{
                 color: 'var(--text-primary, #fff)',
-                borderColor: 'var(--border-color, #404040)',
                 '&:hover': {
-                  borderColor: '#66b3ff',
                   backgroundColor: 'rgba(102, 179, 255, 0.1)'
                 }
               }}
             >
-              Show Filters
-            </Button>
+              <FilterListIcon />
+            </IconButton>
           )}
         </Box>
 
         {/* Center section - Powered with Vibes */}
-        <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+        {!isMobile && (
+          <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, justifyContent: 'center' }}>
           <Typography
             variant="caption"
             sx={{
@@ -335,12 +353,24 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
               H4shkid
             </Typography>
           </Typography>
-        </Box>
+          </Box>
+        )}
 
         {/* Right section - Search, Sort, Stats */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: isMobile ? 0.5 : 2,
+          flex: isMobile ? 1 : 'auto',
+          justifyContent: isMobile ? 'flex-end' : 'flex-start'
+        }}>
           <ClickAwayListener onClickAway={() => setIsDropdownOpen(false)}>
-            <Box sx={{ position: 'relative', minWidth: 250 }}>
+            <Box sx={{ 
+              position: 'relative', 
+              minWidth: isMobile ? 'auto' : 250,
+              width: isMobile ? '100%' : 'auto',
+              maxWidth: isMobile ? 180 : 'none'
+            }}>
               {activeSearchFilter ? (
                 // Show active filter as a chip
                 <Box sx={{ 
@@ -351,7 +381,8 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                   border: '1px solid var(--border-color, #404040)',
                   borderRadius: 1,
                   backgroundColor: 'rgba(255,255,255,0.05)',
-                  minWidth: 250
+                  minWidth: isMobile ? 'auto' : 250,
+                  width: isMobile ? '100%' : 'auto'
                 }}>
                   <Chip
                     label={activeSearchFilter.label}
@@ -371,7 +402,7 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                 <TextField
                   variant="outlined"
                   size="small"
-                  placeholder="Search by token ID or attributes..."
+                  placeholder={isMobile ? "Search..." : "Search by token ID or attributes..."}
                   value={searchValue}
                   onChange={(e) => {
                     const newValue = e.target.value;
@@ -405,7 +436,8 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                     )
                   }}
                   sx={{
-                  minWidth: 250,
+                  minWidth: isMobile ? 'auto' : 250,
+                  width: isMobile ? '100%' : 'auto',
                   '& .MuiOutlinedInput-root': {
                     color: 'var(--text-primary, #fff)',
                     backgroundColor: 'rgba(255,255,255,0.05)',
@@ -466,7 +498,8 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
             </Box>
           </ClickAwayListener>
 
-          <FormControl size="small" sx={{ minWidth: 120 }}>
+          {!isSmallMobile && (
+            <FormControl size="small" sx={{ minWidth: isMobile ? 80 : 120 }}>
             <InputLabel 
               sx={{ 
                 color: 'var(--text-secondary, #aaa)',
@@ -512,25 +545,35 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
               <MenuItem value="rarity_asc">Rarity ↑</MenuItem>
               <MenuItem value="rarity_desc">Rarity ↓</MenuItem>
             </Select>
-          </FormControl>
+            </FormControl>
+          )}
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: isMobile ? 0.5 : 1,
+            flexDirection: isSmallMobile ? 'column' : 'row'
+          }}>
+            {!isSmallMobile && (
+              <Chip 
+                label={totalNfts === 0 ? "Loading..." : `${totalNfts} Total`}
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(102, 179, 255, 0.2)',
+                  color: 'var(--text-primary, #fff)',
+                  border: '1px solid rgba(102, 179, 255, 0.3)',
+                  fontSize: isMobile ? '0.65rem' : '0.75rem'
+                }}
+              />
+            )}
             <Chip 
-              label={totalNfts === 0 ? "Loading..." : `${totalNfts} Total`}
-              size="small"
-              sx={{
-                backgroundColor: 'rgba(102, 179, 255, 0.2)',
-                color: 'var(--text-primary, #fff)',
-                border: '1px solid rgba(102, 179, 255, 0.3)'
-              }}
-            />
-            <Chip 
-              label={`${filteredCount} Showing`}
+              label={isMobile ? `${filteredCount}` : `${filteredCount} Showing`}
               size="small"
               sx={{
                 backgroundColor: 'rgba(76, 175, 80, 0.2)',
                 color: 'var(--text-primary, #fff)',
-                border: '1px solid rgba(76, 175, 80, 0.3)'
+                border: '1px solid rgba(76, 175, 80, 0.3)',
+                fontSize: isMobile ? '0.65rem' : '0.75rem'
               }}
             />
             <ThemeToggle />
@@ -542,7 +585,18 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
 };
 
 const AppContent: React.FC = () => {
-  const [isFiltersOpen, setIsFiltersOpen] = useState(true);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [isFiltersOpen, setIsFiltersOpen] = useState(true); // Always start open, mobile will override
+
+  // Handle mobile vs desktop filter state
+  useEffect(() => {
+    if (isMobile) {
+      setIsFiltersOpen(false); // Close on mobile
+    } else {
+      setIsFiltersOpen(true); // Always open on desktop
+    }
+  }, [isMobile]);
 
   return (
     <ListingsProvider>
@@ -551,10 +605,50 @@ const AppContent: React.FC = () => {
           <AppHeader isFiltersOpen={isFiltersOpen} setIsFiltersOpen={setIsFiltersOpen} />
 
           <div className="main-container">
-            {isFiltersOpen && <FilterSidebar />}
-            <main className={`content-area ${!isFiltersOpen ? 'filters-hidden' : ''}`}>
-              <NFTGrid />
-            </main>
+            {isMobile ? (
+              <>
+                <Drawer
+                  anchor="left"
+                  open={isFiltersOpen}
+                  onClose={() => setIsFiltersOpen(false)}
+                  variant="temporary"
+                  ModalProps={{
+                    keepMounted: true,
+                    disablePortal: false,
+                    disableScrollLock: true // This should help with mobile scrolling
+                  }}
+                  PaperProps={{
+                    sx: {
+                      width: '85vw',
+                      maxWidth: 320,
+                      backgroundColor: 'var(--card-bg)',
+                      borderRight: '1px solid var(--border-color)',
+                      top: 56,
+                      height: 'calc(100vh - 56px)',
+                      borderRadius: '0 8px 8px 0'
+                    }
+                  }}
+                >
+                  <FilterSidebar onClose={() => setIsFiltersOpen(false)} />
+                </Drawer>
+                <main className="content-area" style={{ 
+                  height: 'calc(100vh - 56px)',
+                  overflowY: 'auto',
+                  WebkitOverflowScrolling: 'touch'
+                }}>
+                  <NFTGrid />
+                </main>
+              </>
+            ) : (
+              <>
+                <div style={{ width: '280px', flexShrink: 0, backgroundColor: 'var(--card-bg)', borderRight: '1px solid var(--border-color)' }}>
+                  <FilterSidebar />
+                </div>
+                <main className="content-area" style={{ flex: 1, minWidth: 0 }}>
+                  <NFTGrid />
+                </main>
+              </>
+            )}
           </div>
           
           <BugReportButton />
