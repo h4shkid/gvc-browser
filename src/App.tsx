@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import NFTGrid from './components/NFTGrid';
 import FilterSidebar from './components/FilterSidebar';
 import ThemeToggle from './components/Navbar/ThemeToggle';
+import BugReportButton from './components/BugReportButton';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -556,6 +557,7 @@ const AppContent: React.FC = () => {
             </main>
           </div>
           
+          <BugReportButton />
         </div>
       </FiltersProvider>
     </ListingsProvider>
