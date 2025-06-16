@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import { Badge } from '../utils/badges';
+import { CONFIG } from '../config';
 
 interface BadgeIconProps {
   badge: Badge;
@@ -16,6 +17,8 @@ const BadgeIcon: React.FC<BadgeIconProps> = ({
 }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState(badge.imagePath);
+  const [imageLoading, setImageLoading] = useState(true);
 
   const sizeMap = {
     small: 20,
@@ -24,6 +27,75 @@ const BadgeIcon: React.FC<BadgeIconProps> = ({
   };
 
   const iconSize = sizeMap[size];
+
+  // IPFS gateway fallback logic
+  const tryLoadImage = (url: string, timeout = 3000): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const timer = setTimeout(() => {
+        img.onload = null;
+        img.onerror = null;
+        reject(new Error('Timeout'));
+      }, timeout);
+
+      img.onload = () => {
+        clearTimeout(timer);
+        resolve(url);
+      };
+
+      img.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error('Failed to load'));
+      };
+
+      img.src = url;
+    });
+  };
+
+  const loadImageWithFallback = async () => {
+    if (!badge.imagePath) {
+      setImageError(true);
+      setImageLoading(false);
+      return;
+    }
+
+    // If it's not an IPFS URL, load directly
+    if (!badge.imagePath.includes('ipfs/')) {
+      setCurrentImageUrl(badge.imagePath);
+      setImageLoading(false);
+      return;
+    }
+
+    // Extract IPFS hash from the path
+    const ipfsHash = badge.imagePath.split('ipfs/')[1];
+    if (!ipfsHash) {
+      setImageError(true);
+      setImageLoading(false);
+      return;
+    }
+
+    // Try each IPFS gateway
+    for (let i = 0; i < CONFIG.IPFS_GATEWAYS.length; i++) {
+      try {
+        const gatewayUrl = `${CONFIG.IPFS_GATEWAYS[i]}${ipfsHash}`;
+        await tryLoadImage(gatewayUrl);
+        setCurrentImageUrl(gatewayUrl);
+        setImageLoading(false);
+        return;
+      } catch (error) {
+        // Continue to next gateway
+        continue;
+      }
+    }
+
+    // All gateways failed
+    setImageError(true);
+    setImageLoading(false);
+  };
+
+  useEffect(() => {
+    loadImageWithFallback();
+  }, [badge.imagePath]);
 
   const badgeIcon = (
     <Box
@@ -46,9 +118,9 @@ const BadgeIcon: React.FC<BadgeIconProps> = ({
         } : {}
       }}
     >
-      {!imageError ? (
+      {!imageError && !imageLoading ? (
         <img
-          src={badge.imagePath}
+          src={currentImageUrl}
           alt={badge.displayName}
           style={{
             width: '100%',
@@ -63,6 +135,17 @@ const BadgeIcon: React.FC<BadgeIconProps> = ({
             setImageLoaded(true);
           }}
         />
+      ) : imageLoading ? (
+        <Box
+          sx={{
+            fontSize: size === 'small' ? '6px' : size === 'medium' ? '8px' : '10px',
+            color: 'rgba(255, 255, 255, 0.5)',
+            textAlign: 'center',
+            fontWeight: 'normal'
+          }}
+        >
+          ...
+        </Box>
       ) : (
         <Box
           sx={{
