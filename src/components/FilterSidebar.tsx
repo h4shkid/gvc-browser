@@ -39,50 +39,107 @@ const FilterSidebar: React.FC = () => {
     formatLabel?: (value: string) => string
   ) => {
     return (
-      <Box sx={{ mb: 2 }}>
-        <FormControl fullWidth size="small" variant="outlined">
-          <InputLabel 
+      <Accordion 
+        defaultExpanded={false}
+        sx={{
+          backgroundColor: 'transparent',
+          boxShadow: 'none',
+          borderBottom: '1px solid var(--border-color, #404040)',
+          '&:before': { display: 'none' },
+          '&.Mui-expanded': { margin: 0 },
+          mb: 1
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon sx={{ color: 'var(--text-secondary, #aaa)' }} />}
+          sx={{
+            padding: '8px 16px 8px 0',
+            minHeight: 'auto',
+            '&.Mui-expanded': { minHeight: 'auto' },
+            '& .MuiAccordionSummary-content': { margin: '8px 0' },
+            '& .MuiAccordionSummary-expandIconWrapper': { marginRight: '8px' }
+          }}
+        >
+          <Typography 
+            variant="body2" 
             sx={{ 
-              color: 'var(--text-secondary)',
-              '&.Mui-focused': { color: '#66b3ff' }
+              fontWeight: 500,
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem'
             }}
           >
             {label}
-          </InputLabel>
-          <Select
-            value={value}
-            label={label}
-            onChange={(e) => onChange(e.target.value)}
-            sx={{
-              color: 'var(--text-primary)',
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'var(--border-color)',
-              },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#66b3ff',
-              },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#66b3ff',
-              },
-              '& .MuiSvgIcon-root': {
-                color: 'var(--text-secondary)',
-              }
-            }}
-          >
-            <MenuItem value="">
-              <em>All</em>
-            </MenuItem>
-            {Object.entries(options).map(([option, count]) => (
-              <MenuItem key={option} value={option}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                  <span>{formatLabel ? formatLabel(option) : option}</span>
-                  <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>({count})</span>
-                </Box>
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
+            {value && (
+              <span style={{ color: 'var(--text-secondary)', marginLeft: '8px', fontWeight: 400 }}>
+                ({formatLabel ? formatLabel(value) : value})
+              </span>
+            )}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: '0 0 16px 0' }}>
+          <Box sx={{ pl: 1 }}>
+            {/* Clear option - only show if something is selected */}
+            {value && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={false}
+                    onChange={() => onChange('')}
+                    sx={{
+                      color: 'var(--text-secondary)',
+                      '&.Mui-checked': { color: '#66b3ff' },
+                      p: 0.5
+                    }}
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 120 }}>
+                    <span style={{ fontSize: '0.875rem', fontStyle: 'italic' }}>Clear selection</span>
+                  </Box>
+                }
+                sx={{ 
+                  margin: 0,
+                  display: 'flex',
+                  mb: 1,
+                  '& .MuiFormControlLabel-label': { color: 'var(--text-primary)', width: '100%' }
+                }}
+              />
+            )}
+            
+            {/* Filter options */}
+            {Object.entries(options)
+              .sort(([,a], [,b]) => b - a)
+              .map(([option, count]) => (
+                <FormControlLabel
+                  key={option}
+                  control={
+                    <Checkbox
+                      checked={value === option}
+                      onChange={() => onChange(option)}
+                      sx={{
+                        color: 'var(--text-secondary)',
+                        '&.Mui-checked': { color: '#66b3ff' },
+                        p: 0.5
+                      }}
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 160 }}>
+                      <span style={{ fontSize: '0.875rem' }}>{formatLabel ? formatLabel(option) : option}</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>({count})</span>
+                    </Box>
+                  }
+                  sx={{ 
+                    margin: 0,
+                    display: 'flex',
+                    mb: 0.5,
+                    '& .MuiFormControlLabel-label': { color: 'var(--text-primary)', width: '100%' }
+                  }}
+                />
+              ))}
+          </Box>
+        </AccordionDetails>
+      </Accordion>
     );
   };
 
@@ -118,10 +175,6 @@ const FilterSidebar: React.FC = () => {
 
     return (
       <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, color: 'var(--text-primary)' }}>
-          {label}
-        </Typography>
-        
         <Box sx={{ pl: 1 }}>
           {Object.entries(options.main)
             .sort(([,a], [,b]) => b - a)
@@ -240,7 +293,7 @@ const FilterSidebar: React.FC = () => {
     );
   };
 
-  const renderFilterGroup = (title: string, children: React.ReactNode, defaultExpanded: boolean = true) => {
+  const renderFilterGroup = (title: string, children: React.ReactNode, defaultExpanded: boolean = false) => {
     return (
       <Accordion 
         defaultExpanded={defaultExpanded}
@@ -373,15 +426,22 @@ const FilterSidebar: React.FC = () => {
           </>
         ))}
 
-        {/* Physical Traits */}
-        {renderFilterGroup('Physical Traits', (
-          <>
-            {renderHierarchicalFilter('Background', filterOptions.backgroundHierarchical, filters.background, (values) => setFilter('background', values))}
-            {renderHierarchicalFilter('Body', filterOptions.bodyHierarchical, filters.body, (values) => setFilter('body', values))}
-            {renderHierarchicalFilter('Face', filterOptions.faceHierarchical, filters.face, (values) => setFilter('face', values))}
-            {renderHierarchicalFilter('Hair', filterOptions.hairHierarchical, filters.hair, (values) => setFilter('hair', values))}
-          </>
-        ))}
+        {/* Individual Trait Accordions */}
+        {renderFilterGroup('Background', 
+          renderHierarchicalFilter('Background', filterOptions.backgroundHierarchical, filters.background, (values) => setFilter('background', values))
+        )}
+
+        {renderFilterGroup('Body', 
+          renderHierarchicalFilter('Body', filterOptions.bodyHierarchical, filters.body, (values) => setFilter('body', values))
+        )}
+
+        {renderFilterGroup('Face', 
+          renderHierarchicalFilter('Face', filterOptions.faceHierarchical, filters.face, (values) => setFilter('face', values))
+        )}
+
+        {renderFilterGroup('Hair', 
+          renderHierarchicalFilter('Hair', filterOptions.hairHierarchical, filters.hair, (values) => setFilter('hair', values))
+        )}
 
         {/* Colors (with conditional logic matching old system) */}
         {renderFilterGroup('Colors', (
