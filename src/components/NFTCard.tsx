@@ -15,6 +15,7 @@ import { Mosaic } from 'react-loading-indicators';
 import html2canvas from 'html2canvas';
 import domtoimage from 'dom-to-image-more';
 import { useEthPrice } from '../hooks/useEthPrice';
+import { useTheme } from '../contexts/ThemeContext';
 import BadgesList from './BadgesList';
 import { loadBadgeData, getNFTBadges, BadgeData } from '../utils/badges';
 import { calculateBPR, formatBPR, getBPRColor, getBPRRating } from '../utils/bpr';
@@ -63,6 +64,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const ethPrice = useEthPrice();
+  const { mode } = useTheme();
 
   useEffect(() => {
     loadBadgeData().then(setBadgeData);
@@ -145,6 +147,9 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
       // Wait for any transitions and image loading to complete
       await new Promise(resolve => setTimeout(resolve, 500));
       
+      // Get theme-appropriate background color
+      const backgroundColor = mode === 'light' ? '#ffffff' : '#2a2a2a';
+      
       let blob: Blob | null = null;
       
       // Method 1: Try dom-to-image-more first (often better for complex layouts)
@@ -152,7 +157,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
         console.log('Trying dom-to-image-more...');
         const dataUrl = await domtoimage.toPng(cardRef.current, {
           quality: 0.95,
-          bgcolor: '#2a2a2a',
+          bgcolor: backgroundColor,
           height: cardRef.current.offsetHeight,
           width: cardRef.current.offsetWidth,
           style: {
@@ -173,7 +178,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
           console.log('Trying html2canvas...');
           
           const canvas = await html2canvas(cardRef.current, {
-            backgroundColor: '#2a2a2a',
+            backgroundColor: backgroundColor,
             scale: 2,
             useCORS: false, // Disable CORS for local rendering
             allowTaint: true, // Allow tainted canvas
@@ -270,7 +275,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
     } finally {
       setIsCopying(false);
     }
-  }, [nft.id, isCopying]);
+  }, [nft.id, isCopying, mode]);
 
   // Handle mobile tap detection
   const handleCardClick = useCallback((e: React.MouseEvent) => {
