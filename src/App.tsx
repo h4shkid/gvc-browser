@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ListingsProvider, useListings } from './contexts/ListingsContext';
 import { FiltersProvider, useFilters, SearchSuggestion } from './contexts/FiltersContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import NFTGrid from './components/NFTGrid';
 import FilterSidebar from './components/FilterSidebar';
+import ThemeToggle from './components/Navbar/ThemeToggle';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -530,6 +532,7 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                 border: '1px solid rgba(76, 175, 80, 0.3)'
               }}
             />
+            <ThemeToggle />
           </Box>
         </Box>
       </Toolbar>
@@ -538,20 +541,10 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
 };
 
 const App: React.FC = () => {
-  const [isDarkMode] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
 
-  useEffect(() => {
-    // Apply dark mode class to body
-    if (isDarkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-  }, [isDarkMode]);
-
   return (
-    <>
+    <ThemeProvider>
       <ListingsProvider>
         <FiltersProvider>
           <div className="app">
@@ -567,7 +560,7 @@ const App: React.FC = () => {
           </div>
         </FiltersProvider>
       </ListingsProvider>
-    </>
+    </ThemeProvider>
   );
 };
 

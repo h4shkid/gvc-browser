@@ -1,4 +1,5 @@
 :root {
+  /* Default dark theme variables */
   --bg: #000000;
   --surface: #ffffff;
   --surface-alt: #1f2133;
@@ -14,6 +15,34 @@
   --border-color: #404040;
   --link-color: #66b3ff;
   --link-hover-color: #99ccff;
+}
+
+/* Light mode specific styles */
+body.light-mode {
+  --bg: #f8f9fa;
+  --card-bg: #ffffff;
+  --surface-alt: #f1f3f4;
+  --text-primary: #2c3e50;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --trait-bg: #f8f9fa;
+  --link-color: #0066cc;
+  --link-hover-color: #004499;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode specific styles */
+body.dark-mode {
+  --bg: #000000;
+  --card-bg: #2a2a2a;
+  --surface-alt: #1f2133;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --border-color: #404040;
+  --trait-bg: #333333;
+  --link-color: #66b3ff;
+  --link-hover-color: #99ccff;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 * {
