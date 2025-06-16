@@ -12,4 +12,8 @@ export const CONFIG = {
   OPENSEA_API_KEY: import.meta.env.VITE_OPENSEA_API_KEY || '',
   COLLECTION_CONTRACT: '0xb8ea78fcacef50d41375e44e6814ebba36bb33c4',
   COLLECTION_SLUG: 'good-vibes-club'
-}; 
+};
+
+// Debug logging for API key presence
+console.log('OpenSea API Key present:', !!CONFIG.OPENSEA_API_KEY);
+console.log('API Key length:', CONFIG.OPENSEA_API_KEY.length); 
