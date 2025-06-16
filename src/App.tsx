@@ -540,26 +540,32 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
   );
 };
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
 
   return (
-    <ThemeProvider>
-      <ListingsProvider>
-        <FiltersProvider>
-          <div className="app">
-            <AppHeader isFiltersOpen={isFiltersOpen} setIsFiltersOpen={setIsFiltersOpen} />
+    <ListingsProvider>
+      <FiltersProvider>
+        <div className="app">
+          <AppHeader isFiltersOpen={isFiltersOpen} setIsFiltersOpen={setIsFiltersOpen} />
 
-            <div className="main-container">
-              {isFiltersOpen && <FilterSidebar />}
-              <main className={`content-area ${!isFiltersOpen ? 'filters-hidden' : ''}`}>
-                <NFTGrid />
-              </main>
-            </div>
-            
+          <div className="main-container">
+            {isFiltersOpen && <FilterSidebar />}
+            <main className={`content-area ${!isFiltersOpen ? 'filters-hidden' : ''}`}>
+              <NFTGrid />
+            </main>
           </div>
-        </FiltersProvider>
-      </ListingsProvider>
+          
+        </div>
+      </FiltersProvider>
+    </ListingsProvider>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <ThemeProvider>
+      <AppContent />
     </ThemeProvider>
   );
 };
