@@ -361,10 +361,19 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [filters.sort]);
 
+  // Enhanced fuzzy search function that supports partial matches and word order flexibility
+  const fuzzyMatch = (searchText: string, queryWords: string[]): boolean => {
+    const lowerSearchText = searchText.toLowerCase();
+    
+    // Check if all query words exist in the search text (order independent)
+    return queryWords.every(word => lowerSearchText.includes(word));
+  };
+
   const getSearchSuggestions = (query: string): SearchSuggestion[] => {
     if (!query || query.length < 1) return [];
     
-    const lowerQuery = query.toLowerCase();
+    const lowerQuery = query.toLowerCase().trim();
+    const queryWords = lowerQuery.split(/\s+/).filter(word => word.length > 0);
     const suggestions: SearchSuggestion[] = [];
     
     // Easter egg for serc1n 🎉
@@ -425,7 +434,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
           // Special handling for badges to show display names
           if (key === 'badges') {
             const displayName = getBadgeDisplayName(value, badgeData);
-            if (displayName.toLowerCase().includes(lowerQuery) || value.toLowerCase().includes(lowerQuery)) {
+            if (fuzzyMatch(displayName, queryWords) || fuzzyMatch(value, queryWords)) {
               suggestions.push({
                 type: 'trait',
                 category: label,
@@ -435,8 +444,8 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
               });
             }
           } else {
-            // Regular trait handling
-            if (value.toLowerCase().includes(lowerQuery)) {
+            // Enhanced trait matching: supports fuzzy search
+            if (fuzzyMatch(value, queryWords)) {
               suggestions.push({
                 type: 'trait',
                 category: label,
@@ -464,7 +473,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
         // Add main category types (e.g., "Clothed", "Naked", "Glasses", "Expression", etc.)
         if (options.main) {
           Object.entries(options.main).forEach(([type, count]) => {
-            if (type.toLowerCase().includes(lowerQuery)) {
+            if (fuzzyMatch(type, queryWords)) {
               suggestions.push({
                 type: 'trait',
                 category: `${label} Type`,
@@ -480,7 +489,7 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (options.byType) {
           Object.entries(options.byType).forEach(([type, styles]) => {
             Object.entries(styles).forEach(([style, count]) => {
-              if (style.toLowerCase().includes(lowerQuery)) {
+              if (fuzzyMatch(style, queryWords)) {
                 suggestions.push({
                   type: 'trait',
                   category: label,
@@ -495,16 +504,34 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     });
 
-    // Sort by relevance (exact matches first, then by count)
+    // Enhanced sorting by relevance 
     return suggestions
       .sort((a, b) => {
-        const aExact = a.value.toLowerCase() === lowerQuery;
-        const bExact = b.value.toLowerCase() === lowerQuery;
+        const aValue = a.value.toLowerCase();
+        const bValue = b.value.toLowerCase();
+        
+        // 1. Exact query match gets highest priority
+        const aExact = aValue === lowerQuery;
+        const bExact = bValue === lowerQuery;
         if (aExact && !bExact) return -1;
         if (!aExact && bExact) return 1;
+        
+        // 2. Starts with query gets second priority
+        const aStartsWith = aValue.startsWith(lowerQuery);
+        const bStartsWith = bValue.startsWith(lowerQuery);
+        if (aStartsWith && !bStartsWith) return -1;
+        if (!aStartsWith && bStartsWith) return 1;
+        
+        // 3. Contains all query words in order gets third priority
+        const aInOrder = queryWords.length > 1 && aValue.includes(queryWords.join(' '));
+        const bInOrder = queryWords.length > 1 && bValue.includes(queryWords.join(' '));
+        if (aInOrder && !bInOrder) return -1;
+        if (!aInOrder && bInOrder) return 1;
+        
+        // 4. Sort by count (higher count first)
         return b.count - a.count;
       })
-      .slice(0, 20);
+      .slice(0, 25); // Increased limit for better fuzzy search results
   };
 
   // Load filter options from CSV data
