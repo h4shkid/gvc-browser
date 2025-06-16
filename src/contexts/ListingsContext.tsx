@@ -33,14 +33,6 @@ export const ListingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       // Check if API key is available
       const apiKey = import.meta.env.VITE_OPENSEA_API_KEY;
-      
-      // Debug logging
-      console.log('=== OpenSea API Debug ===');
-      console.log('API Key present:', !!apiKey);
-      console.log('API Key length:', apiKey ? apiKey.length : 0);
-      console.log('API Key first 8 chars:', apiKey ? apiKey.substring(0, 8) + '...' : 'none');
-      console.log('Environment:', import.meta.env.MODE);
-      
       if (!apiKey) {
         console.warn('OpenSea API key not configured. Listings will not be available.');
         setListings({});
@@ -61,23 +53,10 @@ export const ListingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         },
       };
       
-      // Debug API request
-      console.log('Making API request to:', bestUrl);
-      console.log('Request headers:', {
-        'X-API-KEY': apiKey.substring(0, 8) + '...',
-        'Accept': 'application/json'
-      });
-      
       const bestResponse = await fetch(bestUrl, options);
       
-      // Debug API response
-      console.log('API Response status:', bestResponse.status);
-      console.log('API Response headers:', Object.fromEntries(bestResponse.headers.entries()));
-      
       if (!bestResponse.ok) {
-        const errorText = await bestResponse.text();
-        console.error('API Error response body:', errorText);
-        throw new Error(`Failed to fetch /best: ${bestResponse.status} - ${errorText}`);
+        throw new Error(`Failed to fetch /best: ${bestResponse.status}`);
       }
       
       const bestData = await bestResponse.json();
