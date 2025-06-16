@@ -10,7 +10,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mode, setMode] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('gvc-theme');
-    return (saved as 'light' | 'dark') || 'dark'; // Default to dark mode
+    return (saved as 'light' | 'dark') || 'light'; // Default to light mode
   });
 
   useEffect(() => {
