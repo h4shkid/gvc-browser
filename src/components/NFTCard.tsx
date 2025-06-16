@@ -18,6 +18,7 @@ import { useEthPrice } from '../hooks/useEthPrice';
 import BadgesList from './BadgesList';
 import { loadBadgeData, getNFTBadges, BadgeData } from '../utils/badges';
 import { calculateBPR, formatBPR, getBPRColor, getBPRRating } from '../utils/bpr';
+import { loadGridImage, type ImageLoadResult } from '../utils/imageUtils';
 
 interface Listing {
   price: number;
@@ -49,35 +50,13 @@ interface Props {
   onImageLoad?: (nftId: string) => void;
 }
 
-const IPFS_GATEWAYS = [
-  'https://ipfs.io/ipfs/',
-  'https://ipfs.filebase.io/ipfs/',
-  'https://gateway.ipfs.io/ipfs/',
-  'https://dweb.link/ipfs/',
-  'https://nftstorage.link/ipfs/',
-  'https://w3s.link/ipfs/',
-  'https://gateway.pinata.cloud/ipfs/'
-];
-
-// Gateway performance cache
-const gatewayCache = new Map<string, number>();
-const GATEWAY_TIMEOUT = 3000; // 3 seconds per gateway
-
-function getIpfsPath(url: string): string {
-  if (!url) return '';
-  if (url.startsWith('ipfs://')) {
-    return url.slice(7);
-  }
-  const match = url.match(/\/ipfs\/(.+)/);
-  return match ? match[1] : url;
-}
-
 const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
   const [badgeData, setBadgeData] = useState<BadgeData>({});
   const [isVisible, setIsVisible] = useState(false);
   const [loadedImageUrl, setLoadedImageUrl] = useState<string>('');
+  const [imageResult, setImageResult] = useState<ImageLoadResult | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [showCopySuccess, setShowCopySuccess] = useState(false);
@@ -111,78 +90,45 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
     return () => observer.disconnect();
   }, []);
 
-  const ipfsPath = getIpfsPath(nft.image);
+  // NFT data extraction
   const nftBadges = getNFTBadges(nft, badgeData);
   const bprData = calculateBPR(nftBadges, listing?.price || 0);
   const bprColor = getBPRColor(bprData.score, !!listing);
   const bprRating = getBPRRating(bprData.score, !!listing);
 
-  // Optimized image loading with parallel gateway testing
-  const loadImageWithOptimizedGateways = useCallback(async () => {
-    if (!ipfsPath) return;
+  // Optimized image loading: WebP first, IPFS fallback
+  const loadOptimizedImage = useCallback(async () => {
+    if (!nft.id) return;
 
-    // Get cached best gateway or use default order
-    const cacheKey = ipfsPath.split('/')[0]; // Use first part as cache key
-    const cachedGatewayIndex = gatewayCache.get(cacheKey) || 0;
-    
-    // Try cached gateway first, then others
-    const gatewayOrder = [
-      cachedGatewayIndex,
-      ...Array.from({length: IPFS_GATEWAYS.length}, (_, i) => i).filter(i => i !== cachedGatewayIndex)
-    ];
-
-    for (const gatewayIndex of gatewayOrder) {
-      try {
-        const url = IPFS_GATEWAYS[gatewayIndex] + ipfsPath;
-        const success = await tryLoadImage(url);
-        if (success) {
-          setLoadedImageUrl(url);
-          setImageLoading(false);
-          setImgError(false);
-          onImageLoad?.(nft.id);
-          // Cache successful gateway
-          gatewayCache.set(cacheKey, gatewayIndex);
-          return;
-        }
-      } catch (error) {
-        continue; // Try next gateway
+    try {
+      const result = await loadGridImage(nft.id, nft.image);
+      
+      if (result.success) {
+        setLoadedImageUrl(result.url);
+        setImageResult(result);
+        setImageLoading(false);
+        setImgError(false);
+        onImageLoad?.(nft.id);
+      } else {
+        // All loading attempts failed
+        setImgError(true);
+        setImageLoading(false);
+        onImageLoad?.(nft.id);
       }
+    } catch (error) {
+      console.error('Image loading error:', error);
+      setImgError(true);
+      setImageLoading(false);
+      onImageLoad?.(nft.id);
     }
-
-    // All gateways failed
-    setImgError(true);
-    setImageLoading(false);
-    onImageLoad?.(nft.id);
-  }, [ipfsPath, nft.id, onImageLoad]);
-
-  // Helper function to test image loading with timeout
-  const tryLoadImage = (url: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      const timeout = setTimeout(() => {
-        resolve(false);
-      }, GATEWAY_TIMEOUT);
-
-      img.onload = () => {
-        clearTimeout(timeout);
-        resolve(true);
-      };
-
-      img.onerror = () => {
-        clearTimeout(timeout);
-        resolve(false);
-      };
-
-      img.src = url;
-    });
-  };
+  }, [nft.id, nft.image, onImageLoad]);
 
   // Start loading when visible
   useEffect(() => {
     if (isVisible && !loadedImageUrl && !imgError && imageLoading) {
-      loadImageWithOptimizedGateways();
+      loadOptimizedImage();
     }
-  }, [isVisible, loadedImageUrl, imgError, imageLoading, loadImageWithOptimizedGateways]);
+  }, [isVisible, loadedImageUrl, imgError, imageLoading, loadOptimizedImage]);
 
   // Copy card as image to clipboard with multiple fallback methods
   const copyCardToClipboard = useCallback(async (e: React.MouseEvent) => {
@@ -374,23 +320,26 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
         
         {/* Show image when loaded successfully */}
         {!imgError && loadedImageUrl && (
-          <CardMedia
-            component="img"
-            ref={imgRef}
-            src={loadedImageUrl}
-            alt={nft.name}
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              opacity: imageLoading ? 0 : 1,
-              transition: 'opacity 0.3s ease-in-out',
-              willChange: 'opacity'
-            }}
-          />
+          <>
+            <CardMedia
+              component="img"
+              ref={imgRef}
+              src={loadedImageUrl}
+              alt={nft.name}
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                opacity: imageLoading ? 0 : 1,
+                transition: 'opacity 0.3s ease-in-out',
+                willChange: 'opacity'
+              }}
+            />
+            
+          </>
         )}
         
         {/* Show error message only when all gateways failed */}

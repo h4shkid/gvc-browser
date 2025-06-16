@@ -13,6 +13,7 @@ import Skeleton from '@mui/material/Skeleton';
 import { Mosaic } from 'react-loading-indicators';
 import BadgesList from './BadgesList';
 import { loadBadgeData, getNFTBadges, BadgeData } from '../utils/badges';
+import { loadHighQualityImage, type ImageLoadResult } from '../utils/imageUtils';
 import './NFTGrid.css';
 
 interface Listing {
@@ -57,6 +58,8 @@ const NFTGrid: React.FC = () => {
   const [preloadedCount, setPreloadedCount] = useState(INITIAL_LOAD_SIZE); // Start with initial load size
   const [loading, setLoading] = useState(true);
   const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
+  const [modalImageUrl, setModalImageUrl] = useState<string>('');
+  const [modalImageLoading, setModalImageLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [badgeData, setBadgeData] = useState<BadgeData>({});
   const prevFilterString = useRef<string>('');
@@ -64,6 +67,33 @@ const NFTGrid: React.FC = () => {
   useEffect(() => {
     loadBadgeData().then(setBadgeData);
   }, []);
+
+  // Load high-quality image when modal opens
+  useEffect(() => {
+    const loadModalImage = async () => {
+      if (selectedNFT && selectedNFT.image) {
+        setModalImageLoading(true);
+        try {
+          const result = await loadHighQualityImage(selectedNFT.image);
+          if (result.success) {
+            setModalImageUrl(result.url);
+          } else {
+            // Fallback to original image if IPFS fails
+            setModalImageUrl(selectedNFT.image);
+          }
+        } catch (error) {
+          console.error('Modal image loading error:', error);
+          setModalImageUrl(selectedNFT.image);
+        } finally {
+          setModalImageLoading(false);
+        }
+      }
+    };
+
+    if (selectedNFT) {
+      loadModalImage();
+    }
+  }, [selectedNFT]);
 
   useEffect(() => {
     const loadNFTs = async () => {
@@ -264,10 +294,14 @@ const NFTGrid: React.FC = () => {
 
   const handleCardClick = (nft: NFT) => {
     setSelectedNFT(nft);
+    setModalImageUrl(''); // Reset modal image
+    setModalImageLoading(true);
   };
 
   const handleClose = () => {
     setSelectedNFT(null);
+    setModalImageUrl('');
+    setModalImageLoading(false);
   };
 
   const selectedListing = selectedNFT ? listings[selectedNFT.id] as Listing | undefined : undefined;
@@ -403,11 +437,32 @@ const NFTGrid: React.FC = () => {
           }}>
             {/* Image section */}
             <Box sx={{ flex: '0 0 340px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: { xs: '100%', md: 340 } }}>
-              <img
-                src={selectedNFT.image}
-                alt={selectedNFT.name}
-                style={{ width: '100%', maxWidth: 320, borderRadius: 16, background: '#181a20', marginBottom: 16 }}
-              />
+              <Box sx={{ position: 'relative', width: '100%', maxWidth: 320, aspectRatio: '1 / 1', background: '#181a20', borderRadius: 2, mb: 2, overflow: 'hidden' }}>
+                {modalImageLoading ? (
+                  <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Mosaic color="#66b3ff" size="medium" text="" textColor="" />
+                  </Box>
+                ) : (
+                  <img
+                    src={modalImageUrl || selectedNFT.image}
+                    alt={selectedNFT.name}
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      objectFit: 'cover',
+                      borderRadius: 16, 
+                      background: '#181a20'
+                    }}
+                    onError={(e) => {
+                      // Fallback to original image if high-quality fails
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== selectedNFT.image) {
+                        target.src = selectedNFT.image;
+                      }
+                    }}
+                  />
+                )}
+              </Box>
               {/* Badges section */}
               {(() => {
                 const nftBadges = getNFTBadges(selectedNFT, badgeData);
