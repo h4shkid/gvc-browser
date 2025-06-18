@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useFilters } from '../contexts/FiltersContext';
 import { useListings } from '../contexts/ListingsContext';
 import NFTCard from './NFTCard';
+import FilterTags from './FilterTags';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -308,6 +309,7 @@ const NFTGrid: React.FC = () => {
 
   return (
     <>
+      <FilterTags />
       {listingsError && (
         <div style={{ 
           background: 'rgba(255, 0, 0, 0.1)', 

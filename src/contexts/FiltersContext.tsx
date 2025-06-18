@@ -1,6 +1,64 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { loadBadgeData, getBadgeDisplayName, BadgeData } from '../utils/badges';
 
+// URL utilities for filter persistence
+const encodeFiltersToURL = (filters: Filters): string => {
+  const params = new URLSearchParams();
+  
+  Object.entries(filters).forEach(([key, value]) => {
+    if (Array.isArray(value) && value.length > 0) {
+      params.set(key, value.join(','));
+    } else if (typeof value === 'boolean' && value) {
+      params.set(key, 'true');
+    } else if (typeof value === 'string' && value) {
+      params.set(key, value);
+    }
+  });
+  
+  return params.toString();
+};
+
+const decodeFiltersFromURL = (): Partial<Filters> => {
+  const params = new URLSearchParams(window.location.search);
+  const filters: Partial<Filters> = {};
+  
+  // Array filters
+  const arrayFilters = ['gender', 'color_group', 'color_count', 'type_color', 'type_type', 
+                       'body_color', 'hair_color', 'face_color', 'badges', 'badgeCount',
+                       'body', 'background', 'face', 'hair'];
+  
+  arrayFilters.forEach(key => {
+    const value = params.get(key);
+    if (value) {
+      filters[key as keyof Filters] = value.split(',').filter(Boolean) as string[];
+    }
+  });
+  
+  // Boolean filters
+  if (params.get('listed') === 'true') {
+    filters.listed = true;
+  }
+  
+  // String filters
+  const search = params.get('search');
+  if (search) {
+    filters.search = search;
+  }
+  
+  const sort = params.get('sort');
+  if (sort) {
+    filters.sort = sort;
+  }
+  
+  return filters;
+};
+
+const updateURL = (filters: Filters) => {
+  const encoded = encodeFiltersToURL(filters);
+  const newURL = encoded ? `${window.location.pathname}?${encoded}` : window.location.pathname;
+  window.history.replaceState({}, '', newURL);
+};
+
 interface FilterOptions {
   gender: Record<string, number>;
   color_group: Record<string, number>;
@@ -78,6 +136,13 @@ export interface SearchSuggestion {
   label: string;
 }
 
+export interface ActiveFilter {
+  category: keyof Filters;
+  value: string;
+  label: string;
+  displayCategory: string;
+}
+
 interface FiltersContextType {
   filters: Filters;
   filterOptions: FilterOptions;
@@ -90,6 +155,8 @@ interface FiltersContextType {
   applySorting: (nfts: any[], listings: any) => any[];
   getSearchSuggestions: (query: string) => SearchSuggestion[];
   setFilteredCount: (count: number) => void;
+  getActiveFilters: () => ActiveFilter[];
+  removeFilter: (category: keyof Filters, value: string) => void;
 }
 
 const defaultFilters: Filters = {
@@ -115,7 +182,11 @@ const defaultFilters: Filters = {
 const FiltersContext = createContext<FiltersContextType | undefined>(undefined);
 
 export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [filters, setFilters] = useState<Filters>(defaultFilters);
+  const [filters, setFilters] = useState<Filters>(() => {
+    // Initialize filters from URL or use defaults
+    const urlFilters = decodeFiltersFromURL();
+    return { ...defaultFilters, ...urlFilters };
+  });
   const [totalNfts, setTotalNfts] = useState<number>(0);
   const [filteredCount, setFilteredCount] = useState<number>(0);
   const [tokenIds, setTokenIds] = useState<string[]>([]);
@@ -188,14 +259,21 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const setFilter = (category: keyof Filters, value: string | string[] | boolean) => {
-    setFilters(prev => ({
-      ...prev,
-      [category]: value,
-    }));
+    setFilters(prev => {
+      const newFilters = {
+        ...prev,
+        [category]: value,
+      };
+      // Update URL when filters change
+      updateURL(newFilters);
+      return newFilters;
+    });
   };
 
   const clearFilters = () => {
     setFilters(defaultFilters);
+    // Clear URL when filters are cleared
+    window.history.replaceState({}, '', window.location.pathname);
   };
 
   const applyFilters = useCallback((nfts: any[]) => {
@@ -754,8 +832,107 @@ export const FiltersProvider: React.FC<{ children: React.ReactNode }> = ({ child
     loadFilterOptions();
   }, []);
 
+  // Get active filters for display as tags
+  const getActiveFilters = useCallback((): ActiveFilter[] => {
+    const activeFilters: ActiveFilter[] = [];
+    
+    // Category display names mapping
+    const categoryLabels: Record<string, string> = {
+      gender: 'Gender',
+      color_group: 'Color Group',
+      color_count: 'Color Count',
+      type_color: 'Type Color',
+      type_type: 'Type',
+      body_color: 'Body Color',
+      hair_color: 'Hair Color',
+      face_color: 'Face Color',
+      badges: 'Badge',
+      badgeCount: 'Badge Count',
+      body: 'Body',
+      background: 'Background',
+      face: 'Face',
+      hair: 'Hair',
+      listed: 'Listed Only',
+      search: 'Search'
+    };
+
+    // Handle array filters
+    Object.entries(filters).forEach(([category, value]) => {
+      if (Array.isArray(value) && value.length > 0) {
+        value.forEach(item => {
+          let displayValue = item;
+          
+          // Special formatting for badges
+          if (category === 'badges') {
+            displayValue = getBadgeDisplayName(item, badgeData);
+          }
+          // Special formatting for badge count
+          else if (category === 'badgeCount') {
+            displayValue = item === '0' ? 'No badges' : `${item} badge${item === '1' ? '' : 's'}`;
+          }
+          
+          activeFilters.push({
+            category: category as keyof Filters,
+            value: item,
+            label: displayValue,
+            displayCategory: categoryLabels[category] || category
+          });
+        });
+      }
+    });
+
+    // Handle boolean filters
+    if (filters.listed) {
+      activeFilters.push({
+        category: 'listed',
+        value: 'true',
+        label: 'Listed Only',
+        displayCategory: 'Market'
+      });
+    }
+
+    // Handle search filter
+    if (filters.search) {
+      activeFilters.push({
+        category: 'search',
+        value: filters.search,
+        label: filters.search,
+        displayCategory: 'Search'
+      });
+    }
+
+    return activeFilters;
+  }, [filters, badgeData]);
+
+  // Remove a specific filter value
+  const removeFilter = useCallback((category: keyof Filters, value: string) => {
+    if (category === 'listed') {
+      setFilter('listed', false);
+    } else if (category === 'search') {
+      setFilter('search', '');
+    } else if (Array.isArray(filters[category])) {
+      const currentValues = filters[category] as string[];
+      const newValues = currentValues.filter(v => v !== value);
+      setFilter(category, newValues);
+    }
+  }, [filters, setFilter]);
+
   return (
-    <FiltersContext.Provider value={{ filters, filterOptions, conditionalFilters, totalNfts, filteredCount, setFilter, clearFilters, applyFilters, applySorting, getSearchSuggestions, setFilteredCount }}>
+    <FiltersContext.Provider value={{ 
+      filters, 
+      filterOptions, 
+      conditionalFilters, 
+      totalNfts, 
+      filteredCount, 
+      setFilter, 
+      clearFilters, 
+      applyFilters, 
+      applySorting, 
+      getSearchSuggestions, 
+      setFilteredCount,
+      getActiveFilters,
+      removeFilter
+    }}>
       {children}
     </FiltersContext.Provider>
   );
