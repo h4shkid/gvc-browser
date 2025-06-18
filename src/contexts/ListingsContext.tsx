@@ -25,6 +25,7 @@ export const ListingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [listings, setListings] = useState<Record<string, Listing>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
 
   const loadListings = async () => {
     try {
@@ -112,6 +113,7 @@ export const ListingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } while (next && pageCount < 30);
       
       setListings(formattedListings);
+      setLastRefreshTime(Date.now());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load listings');
     } finally {
@@ -122,15 +124,32 @@ export const ListingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     loadListings();
     
-    // Set up 60-second refresh interval
+    // Set up 5-minute refresh interval
     const refreshInterval = setInterval(() => {
-      loadListings();
-    }, 60000); // 60 seconds
+      // Only refresh if page is active
+      if (!document.hidden) {
+        loadListings();
+      }
+    }, 300000); // 5 minutes
+
+    // Handle page visibility change - refresh when page becomes visible again
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Page became visible, refresh if it's been more than 5 minutes
+        const now = Date.now();
+        if (now - lastRefreshTime > 300000) { // 5 minutes
+          loadListings();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       clearInterval(refreshInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [lastRefreshTime]);
 
   return (
     <ListingsContext.Provider value={{ listings, isLoading, error, loadListings }}>

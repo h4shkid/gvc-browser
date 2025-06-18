@@ -313,7 +313,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-      <Box sx={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', background: '#181a20', flex: '0 0 auto' }}>
+      <Box sx={{ position: 'relative', width: '100%', height: 0, paddingBottom: '100%', background: '#181a20', flex: '0 0 auto' }}>
         {/* Show loading animation when image is loading or not yet visible */}
         {(imageLoading || (!loadedImageUrl && !imgError)) && (
           <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#181a20' }}>
