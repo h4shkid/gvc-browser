@@ -209,9 +209,9 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
     <AppBar 
       position="static" 
       sx={{ 
-        background: 'var(--card-bg, #2a2a2a)',
+        background: '#2a2a2a', // Always dark nav bar
         boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-        borderBottom: '1px solid var(--border-color, #404040)',
+        borderBottom: '1px solid #404040', // Always dark border
         zIndex: 1000
       }}
     >
@@ -234,7 +234,7 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                 width: isMobile ? 32 : 40,
                 height: isMobile ? 32 : 40,
                 borderRadius: '50%',
-                border: '2px solid rgba(102, 179, 255, 0.3)',
+                border: '2px solid rgba(247, 77, 113, 0.3)',
                 background: 'rgba(255, 255, 255, 0.1)',
                 padding: '2px'
               }}
@@ -244,8 +244,8 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
               component="h1" 
               sx={{ 
                 fontWeight: 700, 
-                color: 'var(--text-primary, #fff)',
-                background: 'linear-gradient(45deg, #66b3ff, #4dabf7)',
+                color: '#fff', // Always white text in nav
+                background: 'linear-gradient(45deg, #ffa300, #f74d71)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 fontSize: isMobile ? '1.1rem' : '1.5rem'
@@ -273,9 +273,9 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
             <IconButton
               onClick={() => setIsFiltersOpen(true)}
               sx={{
-                color: 'var(--text-primary, #fff)',
+                color: '#fff', // Always white in nav
                 '&:hover': {
-                  backgroundColor: 'rgba(102, 179, 255, 0.1)'
+                  backgroundColor: 'rgba(247, 77, 113, 0.1)'
                 }
               }}
             >
@@ -284,85 +284,14 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
           )}
         </Box>
 
-        {/* Center section - Powered with Vibes */}
-        {!isMobile && (
-          <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, justifyContent: 'center' }}>
-          <Typography
-            variant="caption"
-            sx={{
-              color: 'var(--text-secondary, #aaa)',
-              fontSize: '0.75rem',
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              opacity: 0.8
-            }}
-          >
-            Powered with 
-            <Box
-              component="span"
-              sx={{
-                background: 'linear-gradient(45deg, #66b3ff, #4dabf7)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                fontWeight: 600,
-                mx: 0.5
-              }}
-            >
-              Vibes
-            </Box>
-            by{' '}
-            <Typography
-              component="a"
-              href="https://x.com/dapppunk"
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                color: 'var(--text-primary, #fff)',
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  color: '#66b3ff',
-                  textShadow: '0 0 8px rgba(102, 179, 255, 0.5)'
-                }
-              }}
-            >
-              Dappunk
-            </Typography>
-            {' & '}
-            <Typography
-              component="a"
-              href="https://x.com/h4shkid"
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                color: 'var(--text-primary, #fff)',
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  color: '#66b3ff',
-                  textShadow: '0 0 8px rgba(102, 179, 255, 0.5)'
-                }
-              }}
-            >
-              H4shkid
-            </Typography>
-          </Typography>
-          </Box>
-        )}
 
         {/* Right section - Search, Sort, Stats */}
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
           gap: isMobile ? 0.5 : 2,
-          flex: isMobile ? 1 : 'auto',
-          justifyContent: isMobile ? 'flex-end' : 'flex-start'
+          flex: 1,
+          justifyContent: 'flex-end'
         }}>
           <ClickAwayListener onClickAway={() => setIsDropdownOpen(false)}>
             <Box sx={{ 
@@ -389,10 +318,10 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                     size="small"
                     onDelete={clearSearchFilter}
                     sx={{
-                      backgroundColor: 'rgba(102, 179, 255, 0.2)',
-                      color: 'var(--text-primary, #fff)',
+                      backgroundColor: 'rgba(247, 77, 113, 0.2)',
+                      color: '#fff', // Always white text in nav
                       '& .MuiChip-deleteIcon': {
-                        color: 'var(--text-primary, #fff)'
+                        color: '#fff' // Always white delete icon in nav
                       },
                       maxWidth: 'calc(100% - 20px)'
                     }}
@@ -429,7 +358,7 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                           setSearchValue('');
                           setFilter('search', '');
                         }}
-                        sx={{ color: 'var(--text-secondary, #aaa)' }}
+                        sx={{ color: '#aaa' }} // Always light gray in nav
                       >
                         <ClearIcon fontSize="small" />
                       </IconButton>
@@ -439,20 +368,20 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                   minWidth: isMobile ? 'auto' : 250,
                   width: isMobile ? '100%' : 'auto',
                   '& .MuiOutlinedInput-root': {
-                    color: 'var(--text-primary, #fff)',
+                    color: '#fff', // Always white text in nav
                     backgroundColor: 'rgba(255,255,255,0.05)',
                     '& fieldset': {
-                      borderColor: 'var(--border-color, #404040)',
+                      borderColor: '#404040', // Always dark border in nav
                     },
                     '&:hover fieldset': {
-                      borderColor: '#66b3ff',
+                      borderColor: '#f74d71',
                     },
                     '&.Mui-focused fieldset': {
-                      borderColor: '#66b3ff',
+                      borderColor: '#f74d71',
                     },
                   },
                   '& .MuiOutlinedInput-input::placeholder': {
-                    color: 'var(--text-secondary, #aaa)',
+                    color: '#aaa', // Always light gray placeholder in nav
                   }
                 }}
                 />
@@ -465,9 +394,9 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                     left: 0,
                     right: 0,
                     zIndex: 1300,
-                    bgcolor: 'var(--card-bg, #2a2a2a)',
-                    color: 'var(--text-primary, #fff)',
-                    border: '1px solid var(--border-color, #404040)',
+                    bgcolor: '#2a2a2a', // Always dark dropdown in nav
+                    color: '#fff', // Always white text in nav
+                    border: '1px solid #404040', // Always dark border in nav
                     borderRadius: 1,
                     boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
                     maxHeight: 400,
@@ -483,7 +412,7 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                         cursor: 'pointer',
                         borderBottom: index < searchSuggestions.length - 1 ? '1px solid var(--border-color, #404040)' : 'none',
                         '&:hover': {
-                          backgroundColor: 'rgba(102, 179, 255, 0.1)'
+                          backgroundColor: 'rgba(247, 77, 113, 0.1)'
                         }
                       }}
                       onClick={() => handleSearchSuggestionClick(option)}
@@ -502,8 +431,8 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
             <FormControl size="small" sx={{ minWidth: isMobile ? 80 : 120 }}>
             <InputLabel 
               sx={{ 
-                color: 'var(--text-secondary, #aaa)',
-                '&.Mui-focused': { color: '#66b3ff' }
+                color: '#aaa', // Always light gray in nav
+                '&.Mui-focused': { color: '#f74d71' }
               }}
             >
               Sort
@@ -513,27 +442,27 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
               label="Sort"
               onChange={(e) => setFilter('sort', e.target.value)}
               sx={{
-                color: 'var(--text-primary, #fff)',
+                color: '#fff', // Always white in nav
                 backgroundColor: 'rgba(255,255,255,0.05)',
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'var(--border-color, #404040)',
+                  borderColor: '#404040', // Always dark border in nav
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#66b3ff',
+                  borderColor: '#f74d71',
                 },
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#66b3ff',
+                  borderColor: '#f74d71',
                 },
                 '& .MuiSvgIcon-root': {
-                  color: 'var(--text-primary, #fff)',
+                  color: '#fff', // Always white icons in nav
                 }
               }}
               MenuProps={{
                 PaperProps: {
                   sx: {
-                    bgcolor: 'var(--card-bg, #2a2a2a)',
-                    color: 'var(--text-primary, #fff)',
-                    border: '1px solid var(--border-color, #404040)',
+                    bgcolor: '#2a2a2a', // Always dark dropdown in nav
+                    color: '#fff', // Always white text in nav
+                    border: '1px solid #404040', // Always dark border in nav
                   }
                 }
               }}
@@ -559,9 +488,9 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
                 label={totalNfts === 0 ? "Loading..." : `${totalNfts} Total`}
                 size="small"
                 sx={{
-                  backgroundColor: 'rgba(102, 179, 255, 0.2)',
-                  color: 'var(--text-primary, #fff)',
-                  border: '1px solid rgba(102, 179, 255, 0.3)',
+                  backgroundColor: 'rgba(247, 77, 113, 0.2)',
+                  color: '#fff', // Always white in nav
+                  border: '1px solid rgba(247, 77, 113, 0.3)',
                   fontSize: isMobile ? '0.65rem' : '0.75rem'
                 }}
               />
@@ -571,7 +500,7 @@ const AppHeader: React.FC<HeaderProps> = ({ isFiltersOpen, setIsFiltersOpen }) =
               size="small"
               sx={{
                 backgroundColor: 'rgba(76, 175, 80, 0.2)',
-                color: 'var(--text-primary, #fff)',
+                color: '#fff', // Always white in nav
                 border: '1px solid rgba(76, 175, 80, 0.3)',
                 fontSize: isMobile ? '0.65rem' : '0.75rem'
               }}

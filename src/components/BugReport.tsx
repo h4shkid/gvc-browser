@@ -159,12 +159,12 @@ ${email ? `📧 Contact: ${email}` : '📧 Contact: Anonymous'}
                 color: 'var(--text-primary)',
                 backgroundColor: 'rgba(255,255,255,0.05)',
                 '& fieldset': { borderColor: 'var(--border-color)' },
-                '&:hover fieldset': { borderColor: '#66b3ff' },
-                '&.Mui-focused fieldset': { borderColor: '#66b3ff' }
+                '&:hover fieldset': { borderColor: '#f74d71' },
+                '&.Mui-focused fieldset': { borderColor: '#f74d71' }
               },
               '& .MuiInputLabel-root': {
                 color: 'var(--text-secondary)',
-                '&.Mui-focused': { color: '#66b3ff' }
+                '&.Mui-focused': { color: '#f74d71' }
               }
             }}
           />
@@ -182,12 +182,12 @@ ${email ? `📧 Contact: ${email}` : '📧 Contact: Anonymous'}
                 color: 'var(--text-primary)',
                 backgroundColor: 'rgba(255,255,255,0.05)',
                 '& fieldset': { borderColor: 'var(--border-color)' },
-                '&:hover fieldset': { borderColor: '#66b3ff' },
-                '&.Mui-focused fieldset': { borderColor: '#66b3ff' }
+                '&:hover fieldset': { borderColor: '#f74d71' },
+                '&.Mui-focused fieldset': { borderColor: '#f74d71' }
               },
               '& .MuiInputLabel-root': {
                 color: 'var(--text-secondary)',
-                '&.Mui-focused': { color: '#66b3ff' }
+                '&.Mui-focused': { color: '#f74d71' }
               }
             }}
           />
@@ -204,12 +204,12 @@ ${email ? `📧 Contact: ${email}` : '📧 Contact: Anonymous'}
                 color: 'var(--text-primary)',
                 backgroundColor: 'rgba(255,255,255,0.05)',
                 '& fieldset': { borderColor: 'var(--border-color)' },
-                '&:hover fieldset': { borderColor: '#66b3ff' },
-                '&.Mui-focused fieldset': { borderColor: '#66b3ff' }
+                '&:hover fieldset': { borderColor: '#f74d71' },
+                '&.Mui-focused fieldset': { borderColor: '#f74d71' }
               },
               '& .MuiInputLabel-root': {
                 color: 'var(--text-secondary)',
-                '&.Mui-focused': { color: '#66b3ff' }
+                '&.Mui-focused': { color: '#f74d71' }
               }
             }}
           />

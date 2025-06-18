@@ -97,7 +97,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
                     onChange={() => onChange('')}
                     sx={{
                       color: 'var(--text-secondary)',
-                      '&.Mui-checked': { color: '#66b3ff' },
+                      '&.Mui-checked': { color: '#f74d71' },
                       p: 0.5
                     }}
                   />
@@ -128,7 +128,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
                       onChange={() => onChange(option)}
                       sx={{
                         color: 'var(--text-secondary)',
-                        '&.Mui-checked': { color: '#66b3ff' },
+                        '&.Mui-checked': { color: '#f74d71' },
                         p: 0.5
                       }}
                     />
@@ -205,7 +205,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
                           onChange={() => toggleValue(mainCategory)}
                           sx={{
                             color: 'var(--text-secondary)',
-                            '&.Mui-checked': { color: '#66b3ff' },
+                            '&.Mui-checked': { color: '#f74d71' },
                             p: 0.5
                           }}
                         />
@@ -247,7 +247,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
                                 onChange={() => toggleValue(subCategory)}
                                 sx={{
                                   color: 'var(--text-secondary)',
-                                  '&.Mui-checked': { color: '#66b3ff' },
+                                  '&.Mui-checked': { color: '#f74d71' },
                                   p: 0.5
                                 }}
                               />
@@ -363,7 +363,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
           background: 'var(--border-color)',
           borderRadius: '4px',
           '&:hover': {
-            background: '#66b3ff',
+            background: '#f74d71',
           }
         }
       }}
@@ -384,41 +384,41 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
           >
             Filters
           </Typography>
-          {isMobile && onClose && (
-            <IconButton
-              onClick={onClose}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Button
+              onClick={clearFilters}
               size="small"
-              sx={{
-                color: 'var(--text-secondary)',
+              sx={{ 
+                color: '#f74d71',
+                textTransform: 'none',
+                minWidth: 'auto',
+                padding: '4px 8px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
                 '&:hover': {
-                  color: 'var(--text-primary)',
-                  backgroundColor: 'rgba(102, 179, 255, 0.1)'
+                  backgroundColor: 'rgba(247, 77, 113, 0.1)'
                 }
               }}
             >
-              <CloseIcon />
-            </IconButton>
-          )}
+              CLEAR
+            </Button>
+            {isMobile && onClose && (
+              <IconButton
+                onClick={onClose}
+                size="small"
+                sx={{
+                  color: 'var(--text-secondary)',
+                  '&:hover': {
+                    color: 'var(--text-primary)',
+                    backgroundColor: 'rgba(247, 77, 113, 0.1)'
+                  }
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+          </Box>
         </Box>
-        
-        <Button
-          variant="outlined"
-          onClick={clearFilters}
-          fullWidth
-          size="small"
-          sx={{ 
-            mb: 3,
-            borderColor: '#66b3ff',
-            color: '#66b3ff',
-            textTransform: 'none',
-            '&:hover': {
-              borderColor: '#66b3ff',
-              backgroundColor: 'rgba(102, 179, 255, 0.1)'
-            }
-          }}
-        >
-          Clear All Filters
-        </Button>
 
         {/* Market Section */}
         {renderFilterGroup('Market', (
@@ -429,7 +429,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
                 onChange={(e) => setFilter('listed', e.target.checked)}
                 sx={{
                   color: 'var(--text-secondary)',
-                  '&.Mui-checked': { color: '#66b3ff' },
+                  '&.Mui-checked': { color: '#f74d71' },
                 }}
               />
             }
@@ -492,6 +492,83 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
             {renderBadgeFilter()}
           </>
         ))}
+
+        {/* Powered with Vibes */}
+        <Box sx={{ 
+          mt: 4, 
+          pt: 3, 
+          borderTop: '1px solid var(--border-color, #404040)',
+          textAlign: 'center'
+        }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'var(--text-secondary, #aaa)',
+              fontSize: '0.7rem',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 0.5,
+              opacity: 0.8,
+              flexWrap: 'wrap'
+            }}
+          >
+            Powered with 
+            <Box
+              component="span"
+              sx={{
+                background: 'linear-gradient(45deg, #ffa300, #f74d71)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontWeight: 600,
+                mx: 0.5
+              }}
+            >
+              Vibes
+            </Box>
+            by{' '}
+            <Typography
+              component="a"
+              href="https://x.com/dapppunk"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: 'var(--text-primary, #fff)',
+                textDecoration: 'none',
+                fontWeight: 600,
+                fontSize: '0.7rem',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: '#f74d71',
+                  textShadow: '0 0 8px rgba(247, 77, 113, 0.5)'
+                }
+              }}
+            >
+              Dappunk
+            </Typography>
+            {' & '}
+            <Typography
+              component="a"
+              href="https://x.com/h4shkid"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: 'var(--text-primary, #fff)',
+                textDecoration: 'none',
+                fontWeight: 600,
+                fontSize: '0.7rem',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: '#f74d71',
+                  textShadow: '0 0 8px rgba(247, 77, 113, 0.5)'
+                }
+              }}
+            >
+              H4shkid
+            </Typography>
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

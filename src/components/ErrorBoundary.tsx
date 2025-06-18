@@ -60,7 +60,7 @@ class ErrorBoundary extends Component<Props, State> {
               variant="h4" 
               sx={{ 
                 mb: 2,
-                background: 'linear-gradient(45deg, #66b3ff, #4dabf7)',
+                background: 'linear-gradient(45deg, #ffa300, #f74d71)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 fontWeight: 700
@@ -105,9 +105,9 @@ class ErrorBoundary extends Component<Props, State> {
               startIcon={<RefreshIcon />}
               onClick={this.handleReload}
               sx={{
-                backgroundColor: '#66b3ff',
+                backgroundColor: '#f74d71',
                 '&:hover': {
-                  backgroundColor: '#4dabf7'
+                  backgroundColor: '#f74d71'
                 },
                 textTransform: 'none',
                 fontWeight: 600,

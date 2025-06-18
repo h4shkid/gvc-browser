@@ -36,11 +36,11 @@ body {
 
 /* Selection styles */
 ::selection {
-  background: rgba(102, 179, 255, 0.3);
+  background: rgba(247, 77, 113, 0.3);
   color: var(--text-primary);
 }
 
 ::-moz-selection {
-  background: rgba(102, 179, 255, 0.3);
+  background: rgba(247, 77, 113, 0.3);
   color: var(--text-primary);
 } 

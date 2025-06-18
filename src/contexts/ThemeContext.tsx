@@ -10,7 +10,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mode, setMode] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('gvc-theme');
-    return (saved as 'light' | 'dark') || 'light'; // Default to light mode
+    return (saved as 'light' | 'dark') || 'dark'; // Default to dark mode
   });
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.style.setProperty('--text-secondary', '#a0a0a0');
       root.style.setProperty('--border-color', '#404040');
       root.style.setProperty('--trait-bg', '#333333');
-      root.style.setProperty('--link-color', '#66b3ff');
+      root.style.setProperty('--link-color', '#f74d71');
       root.style.setProperty('--link-hover-color', '#99ccff');
       root.style.setProperty('--shadow', '0 2px 8px rgba(0, 0, 0, 0.3)');
       root.style.setProperty('--primary', '#667eea');

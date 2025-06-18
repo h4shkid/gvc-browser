@@ -113,8 +113,8 @@ const BadgeIcon: React.FC<BadgeIconProps> = ({
         cursor: showTooltip ? 'help' : 'default',
         '&:hover': showTooltip ? {
           transform: 'scale(1.1)',
-          border: '1px solid rgba(102, 179, 255, 0.5)',
-          boxShadow: '0 2px 8px rgba(102, 179, 255, 0.3)'
+          border: '1px solid rgba(247, 77, 113, 0.5)',
+          boxShadow: '0 2px 8px rgba(247, 77, 113, 0.3)'
         } : {}
       }}
     >

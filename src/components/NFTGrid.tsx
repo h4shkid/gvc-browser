@@ -345,7 +345,7 @@ const NFTGrid: React.FC = () => {
             variant="h3" 
             sx={{ 
               mb: 3,
-              background: 'linear-gradient(45deg, #66b3ff, #4dabf7)',
+              background: 'linear-gradient(45deg, #ffa300, #f74d71)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               fontWeight: 700,
@@ -354,7 +354,7 @@ const NFTGrid: React.FC = () => {
           >
             Impending Vibes
           </Typography>
-          <Mosaic color="#66b3ff" size="large" text="" textColor="" />
+          <Mosaic color="#f74d71" size="large" text="" textColor="" />
         </Box>
       )}
       {nftsWithCurrentListings.length === 0 && !loading && (
@@ -397,7 +397,7 @@ const NFTGrid: React.FC = () => {
             gridColumn: '1 / -1' // Span all columns
           }}>
             {isLoadingMore ? (
-              <Mosaic color="#66b3ff" size="small" text="" textColor="" />
+              <Mosaic color="#f74d71" size="small" text="" textColor="" />
             ) : (
               <Button
                 variant="outlined"
@@ -410,11 +410,11 @@ const NFTGrid: React.FC = () => {
                   });
                 }}
                 sx={{
-                  borderColor: '#66b3ff',
-                  color: '#66b3ff',
+                  borderColor: '#f74d71',
+                  color: '#f74d71',
                   '&:hover': {
-                    borderColor: '#66b3ff',
-                    backgroundColor: 'rgba(102, 179, 255, 0.1)'
+                    borderColor: '#f74d71',
+                    backgroundColor: 'rgba(247, 77, 113, 0.1)'
                   }
                 }}
               >
@@ -440,7 +440,7 @@ const NFTGrid: React.FC = () => {
               <Box sx={{ position: 'relative', width: '100%', maxWidth: 320, aspectRatio: '1 / 1', background: '#181a20', borderRadius: 2, mb: 2, overflow: 'hidden' }}>
                 {modalImageLoading ? (
                   <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Mosaic color="#66b3ff" size="medium" text="" textColor="" />
+                    <Mosaic color="#f74d71" size="medium" text="" textColor="" />
                   </Box>
                 ) : (
                   <img
@@ -506,7 +506,7 @@ const NFTGrid: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   startIcon={<OpenInNewIcon />}
-                  sx={{ color: '#66b3ff', textTransform: 'none', fontWeight: 600, mb: 3 }}
+                  sx={{ color: '#f74d71', textTransform: 'none', fontWeight: 600, mb: 3 }}
                 >
                   View on OpenSea
                 </Button>

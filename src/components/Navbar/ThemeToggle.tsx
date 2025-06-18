@@ -11,15 +11,15 @@ const ThemeToggle: React.FC = () => {
       <IconButton
         onClick={toggle}
         sx={{
-          color: 'var(--text-primary, #fff)',
+          color: '#fff', // Always white in nav
           backgroundColor: 'rgba(255, 255, 255, 0.05)',
-          border: '1px solid var(--border-color, #404040)',
+          border: '1px solid #404040', // Always dark border in nav
           borderRadius: 2,
           padding: 1,
           transition: 'all 0.3s ease',
           '&:hover': {
-            backgroundColor: 'rgba(102, 179, 255, 0.1)',
-            borderColor: '#66b3ff',
+            backgroundColor: 'rgba(247, 77, 113, 0.1)',
+            borderColor: '#f74d71',
             transform: 'scale(1.05)',
           },
           '&:active': {
@@ -33,7 +33,8 @@ const ThemeToggle: React.FC = () => {
             fontSize="small" 
             sx={{ 
               transition: 'all 0.3s ease',
-              filter: 'drop-shadow(0 0 4px rgba(102, 179, 255, 0.3))'
+              filter: 'drop-shadow(0 0 4px rgba(247, 77, 113, 0.3))',
+              color: '#fff' // Always white moon icon in nav
             }} 
           />
         ) : (

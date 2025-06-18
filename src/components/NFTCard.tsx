@@ -299,12 +299,10 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
         sx={{
           background: 'var(--card-bg, #2a2a2a)',
           color: 'var(--text-primary, #fff)',
-          borderRadius: 2,
+          borderRadius: 0,
           boxShadow: 3,
           display: 'flex',
           flexDirection: 'column',
-          minHeight: nftBadges.length > 0 ? 420 : 380,
-          height: '100%',
           overflow: 'hidden',
           position: 'relative',
           cursor: 'pointer',
@@ -319,7 +317,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
         {/* Show loading animation when image is loading or not yet visible */}
         {(imageLoading || (!loadedImageUrl && !imgError)) && (
           <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#181a20' }}>
-            <Mosaic color="#66b3ff" size="medium" text="" textColor="" />
+            <Mosaic color="#f74d71" size="medium" text="" textColor="" />
           </Box>
         )}
         
@@ -377,7 +375,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
                   height: 36,
                   '&:hover': {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    color: '#66b3ff',
+                    color: '#f74d71',
                   },
                   '&:disabled': {
                     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -418,11 +416,10 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
           px: 2,
           py: 1,
           borderTop: nftBadges.length > 0 ? '1px solid var(--border-color, #404040)' : 'none',
-          backgroundColor: 'rgba(0, 0, 0, 0.2)',
+          backgroundColor: 'var(--card-bg, #2a2a2a)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: 48
+          justifyContent: 'center'
         }}>
           <BadgesList 
             badges={nftBadges} 
@@ -433,15 +430,14 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
       )}
       
       <CardContent sx={{
-        flex: '0 0 auto',
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         p: 2,
         borderTop: '1px solid var(--border-color, #404040)',
-        minHeight: 56,
         width: '100%',
+        '&:last-child': { pb: 2 } // Remove extra padding from last child
       }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5 }}>
           {listing ? (
@@ -476,7 +472,7 @@ const NFTCard: React.FC<Props> = ({ nft, listing, onClick, onImageLoad }) => {
                 href={listing.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                sx={{ color: '#66b3ff', p: 0.5 }}
+                sx={{ color: '#f74d71', p: 0.5 }}
                 onClick={e => e.stopPropagation()}
                 size="small"
               >
