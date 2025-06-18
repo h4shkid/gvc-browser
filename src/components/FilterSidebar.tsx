@@ -211,7 +211,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
                         />
                       }
                       label={
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 200 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 180 }}>
                           <span style={{ fontSize: '0.875rem' }}>{mainCategory}</span>
                           <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>({count})</span>
                         </Box>
@@ -472,22 +472,16 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onClose = undefined }) =>
           renderHierarchicalFilter('Hair', filterOptions.hairHierarchical, filters.hair, (values) => setFilter('hair', values))
         )}
 
-        {/* Colors (with conditional logic matching old system) */}
+        {/* Colors */}
         {renderFilterGroup('Colors', (
           <>
-            {renderSimpleFilter('Body Color', filterOptions.body_color, filters.body_color[0] || '', (value) => setFilter('body_color', value ? [value] : []))}
-            {/* Face Color only shows when Glasses type face styles are selected */}
-            {conditionalFilters.shouldShowFaceColor('') && 
-              renderSimpleFilter('Face Color', filterOptions.face_color, filters.face_color[0] || '', (value) => setFilter('face_color', value ? [value] : []))
-            }
-            {/* Hair Color only shows when Hair type hair styles are selected */}
-            {conditionalFilters.shouldShowHairColor('') && 
-              renderSimpleFilter('Hair Color', filterOptions.hair_color, filters.hair_color[0] || '', (value) => setFilter('hair_color', value ? [value] : []))
-            }
-            {renderSimpleFilter('Type Color', filterOptions.type_color, filters.type_color[0] || '', (value) => setFilter('type_color', value ? [value] : []))}
-            {renderSimpleFilter('Color Group', filterOptions.color_group, filters.color_group[0] || '', (value) => setFilter('color_group', value ? [value] : []))}
             {/* Color Count only shows 3, 4, 5 options (old system logic) */}
             {renderSimpleFilter('Color Count', conditionalFilters.getFilteredColorCount(), filters.color_count[0] || '', (value) => setFilter('color_count', value ? [value] : []))}
+            {renderSimpleFilter('Color Group', filterOptions.color_group, filters.color_group[0] || '', (value) => setFilter('color_group', value ? [value] : []))}
+            {renderSimpleFilter('Type Color', filterOptions.type_color, filters.type_color[0] || '', (value) => setFilter('type_color', value ? [value] : []))}
+            {renderSimpleFilter('Body Color', filterOptions.body_color, filters.body_color[0] || '', (value) => setFilter('body_color', value ? [value] : []))}
+            {renderSimpleFilter('Hair Color', filterOptions.hair_color, filters.hair_color[0] || '', (value) => setFilter('hair_color', value ? [value] : []))}
+            {renderSimpleFilter('Face Color', filterOptions.face_color, filters.face_color[0] || '', (value) => setFilter('face_color', value ? [value] : []))}
           </>
         ))}
 

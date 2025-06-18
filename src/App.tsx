@@ -641,7 +641,7 @@ const AppContent: React.FC = () => {
               </>
             ) : (
               <>
-                <div style={{ width: '280px', flexShrink: 0, backgroundColor: 'var(--card-bg)', borderRight: '1px solid var(--border-color)' }}>
+                <div style={{ width: '320px', flexShrink: 0, backgroundColor: 'var(--card-bg)', borderRight: '1px solid var(--border-color)' }}>
                   <FilterSidebar />
                 </div>
                 <main className="content-area" style={{ flex: 1, minWidth: 0 }}>
